@@ -1,0 +1,5 @@
+{
+  "name": "Copy of Vola: The Read-Only Auditor",
+  "description": "A futuristic financial AI that audits your raw transaction data, calculates burn rates, identifies leakage, and delivers the 'Vola Verdict' on your financial health.",
+  "requestFramePermissions": []
+}
