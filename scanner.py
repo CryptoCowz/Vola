@@ -1,4 +1,5 @@
 import os
+import io
 import json
 import time
 import smtplib
@@ -53,12 +54,15 @@ def save_state(state):
 
 
 def get_sp500_tickers():
-    """Fetches liquid S&P 500 tickers dynamically from Wikipedia."""
+    """Fetches liquid S&P 500 tickers with custom User-Agent to avoid 403 blocks."""
     try:
         url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-        tables = pd.read_html(url)
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+        response = requests.get(url, headers=headers, timeout=10)
+        tables = pd.read_html(io.StringIO(response.text))
         df = tables[0]
         tickers = df['Symbol'].str.replace('.', '-', regex=False).tolist()
+        print(f"Successfully retrieved {len(tickers)} S&P 500 tickers.")
         return tickers
     except Exception as e:
         print(f"Failed to fetch S&P 500 list, using fallback watchlist: {e}")
@@ -95,7 +99,6 @@ def analyze_ticker(ticker):
         if df_daily.empty or df_hourly.empty or len(df_hourly) < 15:
             return None
 
-        # Flatten multi-index if returned
         if hasattr(df_daily.columns, 'levels') and len(df_daily.columns.levels) > 1:
             df_daily.columns = df_daily.columns.get_level_values(0)
         if hasattr(df_hourly.columns, 'levels') and len(df_hourly.columns.levels) > 1:
@@ -109,7 +112,6 @@ def analyze_ticker(ticker):
         bal_low = round(float(df_hourly['Low'].min()), 2)
         poc = round((bal_high + bal_low) / 2, 2)
 
-        # Fast Pre-filter: Stock must be interacting near balance boundaries (+-2.5%)
         near_high = abs(current_price - bal_high) / bal_high <= 0.025
         near_low = abs(current_price - bal_low) / bal_low <= 0.025
         if not (near_high or near_low):
@@ -260,7 +262,7 @@ def main():
 
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-3.6-flash",
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=system_instruction,
