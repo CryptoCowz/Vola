@@ -2,11 +2,13 @@ name: Hourly Market Scan
 
 on:
   schedule:
+    # Runs at minute 0 every hour between 13:00 and 21:00 UTC, Monday through Friday
+    # Covers regular US equity trading hours (9:30 AM - 4:00 PM Eastern)
     - cron: '0 13-21 * * 1-5'
-  workflow_dispatch:
+  workflow_dispatch: # Allows manual one-click runs from the GitHub Actions UI
 
 permissions:
-  contents: write
+  contents: write # Required to commit and push state.json back to the repo
 
 jobs:
   scan:
@@ -16,7 +18,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          # Pulls the latest commits to prevent push conflicts
           fetch-depth: 1
 
       - name: Set up Python
@@ -32,14 +33,17 @@ jobs:
       - name: Execute Scanner
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_APP_PASSWORD: ${{ secrets.EMAIL_APP_PASSWORD }}
+          EMAIL_RECEIVER: ${{ secrets.EMAIL_RECEIVER }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           python scanner.py
 
-      - name: Commit & Push Updated Cache
+      - name: Commit & Push Updated State Cache
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add state.json
-          # Only commit and push if state.json actually changed
-          git diff --staged --quiet || (git commit -m "chore: update scanner state [skip ci]" && git push)
+          # Only commit and push if state.json actually has changes
+          git diff --staged --quiet || (git commit -m "chore: update scanner state cache [skip ci]" && git push)
