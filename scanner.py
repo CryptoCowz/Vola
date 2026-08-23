@@ -1,3 +1,163 @@
+import os
+import json
+import time
+import smtplib
+import unicodedata
+import requests
+import numpy as np
+import pandas as pd
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from google import genai
+from google.genai import types
+
+# ---------------------------------------------------------
+# Credentials & Environment Sanitization
+# ---------------------------------------------------------
+def clean_env(val):
+    if not val:
+        return ""
+    return unicodedata.normalize("NFKD", val).replace("\xa0", "").strip()
+
+GEMINI_API_KEY = clean_env(os.environ.get("GEMINI_API_KEY"))
+ALPACA_KEY = clean_env(os.environ.get("ALPACA_API_KEY"))
+ALPACA_SECRET = clean_env(os.environ.get("ALPACA_SECRET_KEY"))
+EMAIL_SENDER = clean_env(os.environ.get("EMAIL_SENDER"))
+EMAIL_APP_PASSWORD = clean_env(os.environ.get("EMAIL_APP_PASSWORD")).replace(" ", "")
+EMAIL_RECEIVER = clean_env(os.environ.get("EMAIL_RECEIVER"))
+
+STATE_FILE = "state.json"
+CACHE_EXPIRY_SECONDS = 86400  # 24-hour deduplication window
+
+# Liquid multi-sector watchlist for scanning
+UNIVERSE = [
+    "SPY", "QQQ", "IWM", "AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "TSLA",
+    "AMD", "AVGO", "SMCI", "ARM", "PLTR", "COIN", "MARA", "JPM", "BAC", "GS",
+    "XOM", "CVX", "LLY", "UNH", "NFLX", "DIS", "BA", "CAT", "NKE", "COST"
+]
+
+if not GEMINI_API_KEY:
+    raise ValueError("Missing GEMINI_API_KEY secret. Please add it to GitHub Secrets.")
+
+client = genai.Client(api_key=GEMINI_API_KEY)
+
+
+# ---------------------------------------------------------
+# State Management (Prevent Duplicate Alerts)
+# ---------------------------------------------------------
+def load_state():
+    if not os.path.exists(STATE_FILE):
+        return {}
+    try:
+        with open(STATE_FILE, "r") as f:
+            state = json.load(f)
+    except Exception:
+        return {}
+    now = time.time()
+    return {k: v for k, v in state.items() if now - v < CACHE_EXPIRY_SECONDS}
+
+
+def save_state(state):
+    with open(STATE_FILE, "w") as f:
+        json.dump(state, f, indent=2)
+
+
+# ---------------------------------------------------------
+# Real-Time Data & Technical Indicators
+# ---------------------------------------------------------
+def get_alpaca_bars(symbol, timeframe="1Hour", limit=120):
+    """Fetches real-time candles directly from Alpaca Market Data API (IEX Feed)."""
+    if not (ALPACA_KEY and ALPACA_SECRET):
+        print("Alpaca credentials missing.")
+        return pd.DataFrame()
+        
+    url = f"https://data.alpaca.markets/v2/stocks/{symbol}/bars"
+    headers = {
+        "APCA-API-KEY-ID": ALPACA_KEY,
+        "APCA-API-SECRET-KEY": ALPACA_SECRET
+    }
+    params = {
+        "timeframe": timeframe,
+        "limit": limit,
+        "feed": "iex"
+    }
+    
+    try:
+        res = requests.get(url, headers=headers, params=params, timeout=10)
+        if res.status_code != 200:
+            return pd.DataFrame()
+        
+        data = res.json().get("bars", [])
+        if not data:
+            return pd.DataFrame()
+        
+        df = pd.DataFrame(data)
+        df.rename(columns={"t": "Timestamp", "o": "Open", "h": "High", "l": "Low", "c": "Close", "v": "Volume"}, inplace=True)
+        return df
+    except Exception as e:
+        print(f"Error fetching data for {symbol}: {e}")
+        return pd.DataFrame()
+
+
+def calculate_atr(df, period=14):
+    """Calculates Average True Range."""
+    high = df['High']
+    low = df['Low']
+    close = df['Close'].shift(1)
+    tr = np.maximum(high - low, np.maximum((high - close).abs(), (low - close).abs()))
+    atr = tr.rolling(window=period).mean().dropna()
+    return float(atr.iloc[-1]) if not atr.empty else 1.0
+
+
+def calculate_volatility_rank(df_daily):
+    """Calculates 30-day realized volatility and ranks it (Sosnoff IVR proxy)."""
+    log_ret = np.log(df_daily['Close'] / df_daily['Close'].shift(1))
+    rolling_vol = (log_ret.rolling(window=20).std() * np.sqrt(252) * 100).dropna()
+    if rolling_vol.empty:
+        return 20.0, 50.0
+    recent_vol = rolling_vol.iloc[-1]
+    vol_min = rolling_vol.min()
+    vol_max = rolling_vol.max()
+    ivr_proxy = 50.0 if vol_max == vol_min else ((recent_vol - vol_min) / (vol_max - vol_min)) * 100
+    return round(float(recent_vol), 2), round(float(ivr_proxy), 1)
+
+
+def process_ticker(ticker):
+    """Constructs technical data payload for candidate tickers."""
+    df_hourly = get_alpaca_bars(ticker, timeframe="1Hour", limit=80)
+    df_daily = get_alpaca_bars(ticker, timeframe="1Day", limit=250)
+    
+    if df_hourly.empty or len(df_hourly) < 20:
+        return None
+
+    current_price = round(float(df_hourly['Close'].iloc[-1]), 2)
+    hourly_atr = round(calculate_atr(df_hourly, period=14), 2)
+    curr_vol, vol_rank = calculate_volatility_rank(df_daily) if not df_daily.empty else (20.0, 50.0)
+
+    bal_high = round(float(df_hourly['High'].tail(40).max()), 2)
+    bal_low = round(float(df_hourly['Low'].tail(40).min()), 2)
+    poc = round((bal_high + bal_low) / 2, 2)
+
+    return {
+        "ticker": ticker,
+        "current_price": current_price,
+        "hourly_atr": hourly_atr,
+        "pulcini_atr_115_buffer": round(hourly_atr * 1.15, 2),
+        "volatility_context": {
+            "vol_rank_ivr": vol_rank,
+            "regime": "High Vol" if vol_rank >= 50 else "Low Vol"
+        },
+        "balance_range": {
+            "top": bal_high,
+            "bottom": bal_low,
+            "poc": poc
+        }
+    }
+
+
+# ---------------------------------------------------------
+# Notification Pipeline (VOLA Update with BCC)
+# ---------------------------------------------------------
 def send_digest_email(top_setups):
     """Sends a consolidated Top 20 opportunities digest via BCC with VOLA branding."""
     if not (EMAIL_SENDER and EMAIL_APP_PASSWORD and EMAIL_RECEIVER):
@@ -63,17 +223,86 @@ def send_digest_email(top_setups):
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    # Changes sender display name to VOLA Update
     msg["From"] = f"VOLA Update <{EMAIL_SENDER}>"
-    # Hides individual emails from recipients
     msg["To"] = "VOLA Subscribers <undisclosed-recipients:;>"
     msg.attach(MIMEText(html_content, "html", "utf-8"))
 
     try:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(EMAIL_SENDER, EMAIL_APP_PASSWORD)
-            # Passing 'recipients' list to sendmail delivers the email to each inbox via BCC
             server.sendmail(EMAIL_SENDER, recipients, msg.as_string())
         print(f"VOLA Update successfully dispatched via BCC to {len(recipients)} recipients.")
     except Exception as e:
         print(f"Failed to send VOLA email: {e}")
+
+
+# ---------------------------------------------------------
+# Main Execution
+# ---------------------------------------------------------
+def main():
+    state = load_state()
+    print("Initiating real-time scan via Alpaca Data Feed...")
+    
+    candidates = []
+    for ticker in UNIVERSE:
+        data = process_ticker(ticker)
+        if data:
+            candidates.append(data)
+            
+    print(f"Processed {len(candidates)} active symbols.")
+
+    if not candidates:
+        print("No market data available to scan.")
+        return
+
+    prompt = f"""
+    Real-Time Market Data:
+    {json.dumps(candidates, default=str)}
+
+    Rank and select the Top 20 Most Asymmetric Trade Setups based on:
+    1. Structure (Brando/Pulcini): Reclaims, Failed Breakouts, Rejections at Balance Edges.
+    2. Confirmation: Minimum price displacement of `pulcini_atr_115_buffer` away from the level.
+    3. Profit Potential: Prioritize high R:R (minimum 2.0:1) toward opposite balance POC/extremes.
+    4. Volatility (Sosnoff): High IV Rank (>=50) for mean-reversion reclaims.
+
+    Return JSON array of max 20 objects sorted by potential profitability.
+    """
+
+    system_instruction = """
+    You are an elite Quantitative Portfolio & Momentum Trader.
+    Return JSON array of objects with keys:
+    ticker, direction, setup_type, key_level, trigger_price, invalidation_price, risk_reward, vol_rank, reasoning.
+    """
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                response_mime_type="application/json"
+            )
+        )
+        
+        ranked_setups = json.loads(response.text)
+        new_setups_for_digest = []
+
+        for s in ranked_setups:
+            alert_id = f"{s['ticker']}_{s['setup_type']}_{s['key_level']}".replace(" ", "_")
+            if alert_id in state:
+                continue
+            new_setups_for_digest.append(s)
+            state[alert_id] = time.time()
+
+        if new_setups_for_digest:
+            send_digest_email(new_setups_for_digest)
+            save_state(state)
+        else:
+            print("No new qualifying setups passed the 24h deduplication filter.")
+            
+    except Exception as e:
+        print(f"Evaluation error: {e}")
+
+
+if __name__ == "__main__":
+    main()
