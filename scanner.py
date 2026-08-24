@@ -1,5 +1,4 @@
 import os
-import io
 import json
 import time
 import smtplib
@@ -32,7 +31,7 @@ EMAIL_RECEIVER = clean_env(os.environ.get("EMAIL_RECEIVER"))
 STATE_FILE = "state.json"
 CACHE_EXPIRY_SECONDS = 86400  # 24-hour deduplication window
 
-# High-liquidity universe spanning tech, semiconductors, financials, retail, energy, and indices
+# High-liquidity multi-sector watchlist for scanning
 UNIVERSE = [
     "SPY", "QQQ", "IWM", "AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "TSLA",
     "AMD", "AVGO", "SMCI", "ARM", "PLTR", "COIN", "MARA", "JPM", "BAC", "GS",
@@ -45,6 +44,9 @@ if not GEMINI_API_KEY:
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 
+# ---------------------------------------------------------
+# State Management (Prevent Duplicate Alerts)
+# ---------------------------------------------------------
 def load_state():
     if not os.path.exists(STATE_FILE):
         return {}
@@ -63,10 +65,10 @@ def save_state(state):
 
 
 # ---------------------------------------------------------
-# Dual Market Data Engine (Alpaca with yfinance Fallback)
+# Dual Market Data Engine (Alpaca + yfinance Fallback)
 # ---------------------------------------------------------
 def get_alpaca_bars(symbol, timeframe="1Hour", days_back=30):
-    """Fetches real-time candles from Alpaca with proper start time parameters."""
+    """Fetches real-time candles from Alpaca Data API."""
     if not (ALPACA_KEY and ALPACA_SECRET):
         return pd.DataFrame()
 
@@ -104,7 +106,7 @@ def get_alpaca_bars(symbol, timeframe="1Hour", days_back=30):
 
 
 def get_yfinance_bars(symbol, interval="1h", period="5d"):
-    """Fallback engine using yfinance with multi-index flattening."""
+    """Fallback engine using yfinance."""
     try:
         df = yf.download(symbol, period=period, interval=interval, progress=False)
         if df.empty:
@@ -139,13 +141,11 @@ def calculate_volatility_rank(df_daily):
 
 
 def process_ticker(ticker):
-    """Attempts Alpaca fetch first; falls back to yfinance if unavailable."""
-    # 1. Hourly Bars
+    """Retrieves candle data and builds technical payload."""
     df_hourly = get_alpaca_bars(ticker, timeframe="1Hour", days_back=15)
     if df_hourly.empty or len(df_hourly) < 15:
         df_hourly = get_yfinance_bars(ticker, interval="1h", period="5d")
 
-    # 2. Daily Bars (for IVR calculation)
     df_daily = get_alpaca_bars(ticker, timeframe="1Day", days_back=365)
     if df_daily.empty or len(df_daily) < 50:
         df_daily = get_yfinance_bars(ticker, interval="1d", period="1y")
@@ -179,9 +179,10 @@ def process_ticker(ticker):
 
 
 # ---------------------------------------------------------
-# Notification Pipeline (VOLA Update with BCC)
+# Mobile-Optimized VOLA Email Dispatch (BCC)
 # ---------------------------------------------------------
 def send_digest_email(top_setups):
+    """Sends a mobile-optimized card-based VOLA intelligence digest via BCC."""
     if not (EMAIL_SENDER and EMAIL_APP_PASSWORD and EMAIL_RECEIVER):
         print("Email configuration incomplete. Skipping email.")
         return
@@ -191,53 +192,86 @@ def send_digest_email(top_setups):
         print("No valid recipient addresses found.")
         return
 
-    subject = f"VOLA Update: Top {len(top_setups)} Market Setups & Volatility Report"
+    subject = f"⚡ VOLA Briefing: Top {len(top_setups)} Market Setups & Volatility Report"
     
-    rows_html = ""
+    cards_html = ""
     for idx, s in enumerate(top_setups, 1):
-        color = "#2e7d32" if "Long" in s.get('direction', '') else "#c62828"
-        rows_html += f"""
-        <tr style="border-bottom: 1px solid #e0e0e0;">
-          <td style="padding: 8px; font-weight: bold;">#{idx} {s['ticker']}</td>
-          <td style="padding: 8px; color: {color}; font-weight: bold;">{s['direction']} ({s['setup_type']})</td>
-          <td style="padding: 8px;">${s['key_level']}</td>
-          <td style="padding: 8px;">${s['trigger_price']}</td>
-          <td style="padding: 8px;">${s['invalidation_price']}</td>
-          <td style="padding: 8px; font-weight: bold;">{s.get('risk_reward', '2.5:1')}</td>
-          <td style="padding: 8px;">{s['vol_rank']}%</td>
-          <td style="padding: 8px; font-size: 13px; color: #555;">{s['reasoning']}</td>
-        </tr>
+        is_long = "Long" in s.get('direction', '')
+        badge_bg = "#ecfdf5" if is_long else "#fef2f2"
+        badge_text = "#065f46" if is_long else "#991b1b"
+        border_accent = "#10b981" if is_long else "#ef4444"
+        
+        cards_html += f"""
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid {border_accent}; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <!-- Top Row: Ticker + Badge + R:R -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+            <div>
+              <span style="font-size: 18px; font-weight: 800; color: #0f172a;">#{idx} {s['ticker']}</span>
+              <span style="background-color: {badge_bg}; color: {badge_text}; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 9999px; margin-left: 6px; text-transform: uppercase;">
+                {s['direction']} • {s['setup_type']}
+              </span>
+            </div>
+            <div style="font-size: 13px; font-weight: 700; color: #4338ca;">
+              R:R {s.get('risk_reward', '2.5:1')}
+            </div>
+          </div>
+
+          <!-- Execution Levels Grid -->
+          <table style="width: 100%; font-size: 13px; color: #475569; margin-bottom: 12px; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 4px 0; width: 50%;"><strong>Key Level:</strong> <span style="color: #0f172a;">${s['key_level']}</span></td>
+              <td style="padding: 4px 0; width: 50%;"><strong>Trigger (+1.15 ATR):</strong> <span style="color: #0f172a;">${s['trigger_price']}</span></td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 0;"><strong>Invalidation:</strong> <span style="color: #0f172a;">${s['invalidation_price']}</span></td>
+              <td style="padding: 4px 0;"><strong>IV Rank:</strong> <span style="color: #0f172a;">{s['vol_rank']}%</span></td>
+            </tr>
+          </table>
+
+          <!-- Execution Thesis -->
+          <div style="background-color: #f8fafc; border-radius: 6px; padding: 10px 12px; font-size: 13px; color: #334155; line-height: 1.45;">
+            <strong style="color: #1e293b;">Thesis:</strong> {s['reasoning']}
+          </div>
+        </div>
         """
 
     html_content = f"""
+    <!DOCTYPE html>
     <html>
-      <body style="font-family: Arial, sans-serif; line-height: 1.5; color: #222; max-width: 950px; margin: auto;">
-        <div style="background-color: #0f172a; padding: 16px 20px; border-radius: 6px 6px 0 0;">
-          <h2 style="color: #38bdf8; margin: 0; font-size: 20px;">
-            ⚡ VOLA Market Intelligence Digest
-          </h2>
-          <p style="color: #94a3b8; margin: 4px 0 0 0; font-size: 13px;">
-            Top {len(top_setups)} Opportunities (Price Action Structure, ATR Displacement & Volatility Rank)
-          </p>
-        </div>
-        <div style="border: 1px solid #e2e8f0; border-top: none; padding: 15px; border-radius: 0 0 6px 6px;">
-          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
-            <thead>
-              <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                <th style="padding: 8px;">Rank / Ticker</th>
-                <th style="padding: 8px;">Bias</th>
-                <th style="padding: 8px;">Key Level</th>
-                <th style="padding: 8px;">Trigger (+1.15 ATR)</th>
-                <th style="padding: 8px;">Invalidation</th>
-                <th style="padding: 8px;">Est. R:R</th>
-                <th style="padding: 8px;">IV Rank</th>
-                <th style="padding: 8px;">Thesis</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows_html}
-            </tbody>
-          </table>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; margin: 0; padding: 16px 8px; color: #1e293b;">
+        <div style="max-width: 600px; margin: 0 auto;">
+          
+          <!-- Header Banner -->
+          <div style="background: linear-gradient(135deg, #1e1b2e 0%, #2d2244 100%); padding: 24px 20px; border-radius: 12px 12px 0 0; text-align: left;">
+            <div style="display: inline-block; background-color: #38bdf8; color: #0f172a; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; margin-bottom: 8px;">
+              Agentic Intelligence
+            </div>
+            <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">
+              VOLA Market Briefing
+            </h1>
+            <p style="color: #cbd5e1; margin: 6px 0 0 0; font-size: 14px; line-height: 1.4;">
+              Here are your Top {len(top_setups)} high-conviction market opportunities, filtered to eliminate cognitive fatigue and emotional friction.
+            </p>
+          </div>
+
+          <!-- Market Content Container -->
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-top: none; padding: 16px; border-radius: 0 0 12px 12px;">
+            {cards_html}
+
+            <!-- Footer -->
+            <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px; line-height: 1.5;">
+              <p style="margin: 0; font-weight: 600; color: #64748b;">
+                "Automating the survival mechanism so you can reclaim your life energy."
+              </p>
+              <p style="margin: 4px 0 0 0;">
+                VOLA Autonomous Fiduciary • Confidential Execution
+              </p>
+            </div>
+          </div>
+
         </div>
       </body>
     </html>
@@ -253,17 +287,17 @@ def send_digest_email(top_setups):
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(EMAIL_SENDER, EMAIL_APP_PASSWORD)
             server.sendmail(EMAIL_SENDER, recipients, msg.as_string())
-        print(f"VOLA Update successfully dispatched via BCC to {len(recipients)} recipients.")
+        print(f"VOLA Mobile Digest successfully dispatched to {len(recipients)} recipients via BCC.")
     except Exception as e:
         print(f"Failed to send VOLA email: {e}")
 
 
 # ---------------------------------------------------------
-# Main Execution
+# Main Execution Pipeline
 # ---------------------------------------------------------
 def main():
     state = load_state()
-    print("Initiating market scan across watchlist...")
+    print("Initiating real-time scan via Alpaca Data Feed...")
     
     candidates = []
     for ticker in UNIVERSE:
