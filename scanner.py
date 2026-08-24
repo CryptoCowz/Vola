@@ -1,4 +1,5 @@
 import os
+import io
 import json
 import time
 import smtplib
@@ -6,6 +7,8 @@ import unicodedata
 import requests
 import numpy as np
 import pandas as pd
+import yfinance as yf
+from datetime import datetime, timedelta, timezone
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from google import genai
@@ -29,7 +32,7 @@ EMAIL_RECEIVER = clean_env(os.environ.get("EMAIL_RECEIVER"))
 STATE_FILE = "state.json"
 CACHE_EXPIRY_SECONDS = 86400  # 24-hour deduplication window
 
-# Liquid multi-sector watchlist for scanning
+# High-liquidity universe spanning tech, semiconductors, financials, retail, energy, and indices
 UNIVERSE = [
     "SPY", "QQQ", "IWM", "AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "TSLA",
     "AMD", "AVGO", "SMCI", "ARM", "PLTR", "COIN", "MARA", "JPM", "BAC", "GS",
@@ -42,9 +45,6 @@ if not GEMINI_API_KEY:
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 
-# ---------------------------------------------------------
-# State Management (Prevent Duplicate Alerts)
-# ---------------------------------------------------------
 def load_state():
     if not os.path.exists(STATE_FILE):
         return {}
@@ -63,44 +63,61 @@ def save_state(state):
 
 
 # ---------------------------------------------------------
-# Real-Time Data & Technical Indicators
+# Dual Market Data Engine (Alpaca with yfinance Fallback)
 # ---------------------------------------------------------
-def get_alpaca_bars(symbol, timeframe="1Hour", limit=120):
-    """Fetches real-time candles directly from Alpaca Market Data API (IEX Feed)."""
+def get_alpaca_bars(symbol, timeframe="1Hour", days_back=30):
+    """Fetches real-time candles from Alpaca with proper start time parameters."""
     if not (ALPACA_KEY and ALPACA_SECRET):
-        print("Alpaca credentials missing.")
         return pd.DataFrame()
-        
+
     url = f"https://data.alpaca.markets/v2/stocks/{symbol}/bars"
     headers = {
         "APCA-API-KEY-ID": ALPACA_KEY,
         "APCA-API-SECRET-KEY": ALPACA_SECRET
     }
+    
+    start_dt = (datetime.now(timezone.utc) - timedelta(days=days_back)).strftime("%Y-%m-%dT%H:%M:%SZ")
     params = {
         "timeframe": timeframe,
-        "limit": limit,
-        "feed": "iex"
+        "start": start_dt,
+        "limit": 1000,
+        "feed": "iex",
+        "sort": "asc"
     }
-    
+
     try:
         res = requests.get(url, headers=headers, params=params, timeout=10)
         if res.status_code != 200:
+            print(f"[Alpaca Note] {symbol} returned status {res.status_code}: {res.text[:100]}")
             return pd.DataFrame()
         
-        data = res.json().get("bars", [])
-        if not data:
+        bars = res.json().get("bars", [])
+        if not bars:
             return pd.DataFrame()
-        
-        df = pd.DataFrame(data)
+
+        df = pd.DataFrame(bars)
         df.rename(columns={"t": "Timestamp", "o": "Open", "h": "High", "l": "Low", "c": "Close", "v": "Volume"}, inplace=True)
         return df
     except Exception as e:
-        print(f"Error fetching data for {symbol}: {e}")
+        print(f"[Alpaca Error] {symbol}: {e}")
+        return pd.DataFrame()
+
+
+def get_yfinance_bars(symbol, interval="1h", period="5d"):
+    """Fallback engine using yfinance with multi-index flattening."""
+    try:
+        df = yf.download(symbol, period=period, interval=interval, progress=False)
+        if df.empty:
+            return pd.DataFrame()
+        if hasattr(df.columns, 'levels') and len(df.columns.levels) > 1:
+            df.columns = df.columns.get_level_values(0)
+        return df
+    except Exception as e:
+        print(f"[yfinance Error] {symbol}: {e}")
         return pd.DataFrame()
 
 
 def calculate_atr(df, period=14):
-    """Calculates Average True Range."""
     high = df['High']
     low = df['Low']
     close = df['Close'].shift(1)
@@ -110,7 +127,6 @@ def calculate_atr(df, period=14):
 
 
 def calculate_volatility_rank(df_daily):
-    """Calculates 30-day realized volatility and ranks it (Sosnoff IVR proxy)."""
     log_ret = np.log(df_daily['Close'] / df_daily['Close'].shift(1))
     rolling_vol = (log_ret.rolling(window=20).std() * np.sqrt(252) * 100).dropna()
     if rolling_vol.empty:
@@ -123,19 +139,26 @@ def calculate_volatility_rank(df_daily):
 
 
 def process_ticker(ticker):
-    """Constructs technical data payload for candidate tickers."""
-    df_hourly = get_alpaca_bars(ticker, timeframe="1Hour", limit=80)
-    df_daily = get_alpaca_bars(ticker, timeframe="1Day", limit=250)
-    
-    if df_hourly.empty or len(df_hourly) < 20:
+    """Attempts Alpaca fetch first; falls back to yfinance if unavailable."""
+    # 1. Hourly Bars
+    df_hourly = get_alpaca_bars(ticker, timeframe="1Hour", days_back=15)
+    if df_hourly.empty or len(df_hourly) < 15:
+        df_hourly = get_yfinance_bars(ticker, interval="1h", period="5d")
+
+    # 2. Daily Bars (for IVR calculation)
+    df_daily = get_alpaca_bars(ticker, timeframe="1Day", days_back=365)
+    if df_daily.empty or len(df_daily) < 50:
+        df_daily = get_yfinance_bars(ticker, interval="1d", period="1y")
+
+    if df_hourly.empty or len(df_hourly) < 10:
         return None
 
-    current_price = round(float(df_hourly['Close'].iloc[-1]), 2)
+    current_price = round(float(df_hourly['Close'].dropna().iloc[-1]), 2)
     hourly_atr = round(calculate_atr(df_hourly, period=14), 2)
     curr_vol, vol_rank = calculate_volatility_rank(df_daily) if not df_daily.empty else (20.0, 50.0)
 
-    bal_high = round(float(df_hourly['High'].tail(40).max()), 2)
-    bal_low = round(float(df_hourly['Low'].tail(40).min()), 2)
+    bal_high = round(float(df_hourly['High'].max()), 2)
+    bal_low = round(float(df_hourly['Low'].min()), 2)
     poc = round((bal_high + bal_low) / 2, 2)
 
     return {
@@ -159,7 +182,6 @@ def process_ticker(ticker):
 # Notification Pipeline (VOLA Update with BCC)
 # ---------------------------------------------------------
 def send_digest_email(top_setups):
-    """Sends a consolidated Top 20 opportunities digest via BCC with VOLA branding."""
     if not (EMAIL_SENDER and EMAIL_APP_PASSWORD and EMAIL_RECEIVER):
         print("Email configuration incomplete. Skipping email.")
         return
@@ -241,7 +263,7 @@ def send_digest_email(top_setups):
 # ---------------------------------------------------------
 def main():
     state = load_state()
-    print("Initiating real-time scan via Alpaca Data Feed...")
+    print("Initiating market scan across watchlist...")
     
     candidates = []
     for ticker in UNIVERSE:
@@ -249,7 +271,7 @@ def main():
         if data:
             candidates.append(data)
             
-    print(f"Processed {len(candidates)} active symbols.")
+    print(f"Successfully processed {len(candidates)} active symbols.")
 
     if not candidates:
         print("No market data available to scan.")
