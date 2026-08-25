@@ -154,5 +154,11 @@
   "JPM_Balance_Bottom_Reclaim_350.43": 1787606327.119998,
   "PLTR_Balance_Bottom_Reclaim_168.36": 1787606327.119999,
   "COST_Balance_Top_Rejection_977.98": 1787606327.1200006,
-  "GS_Balance_Bottom_Reclaim_1001.78": 1787606327.1200016
+  "GS_Balance_Bottom_Reclaim_1001.78": 1787606327.1200016,
+  "MARA_Failed_Breakout_12.46": 1787665248.113493,
+  "TSLA_Balance_Top_Rejection_366.5": 1787665248.1134984,
+  "AAPL_Failed_Breakout_320.28": 1787665248.113502,
+  "GS_Failed_Breakout_1058.57": 1787665248.1135051,
+  "LLY_Balance_Top_Rejection_1292.51": 1787665248.1135066,
+  "PLTR_Failed_Breakout_182.42": 1787665248.1135077
 }
