@@ -1,6 +1,5 @@
 google-genai
 yfinance
 numpy
+pandas
 requests
-lxml
-html5lib
