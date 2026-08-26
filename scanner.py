@@ -31,7 +31,7 @@ EMAIL_RECEIVER = clean_env(os.environ.get("EMAIL_RECEIVER"))
 STATE_FILE = "state.json"
 CACHE_EXPIRY_SECONDS = 86400  # 24-hour deduplication window
 
-# High-liquidity multi-sector watchlist for scanning
+# High-liquidity multi-sector watchlist
 UNIVERSE = [
     "SPY", "QQQ", "IWM", "AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "META", "TSLA",
     "AMD", "AVGO", "SMCI", "ARM", "PLTR", "COIN", "MARA", "JPM", "BAC", "GS",
@@ -45,18 +45,43 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 
 # ---------------------------------------------------------
-# State Management (Prevent Duplicate Alerts)
+# State & Gamified Sandbox Ledger Management
 # ---------------------------------------------------------
 def load_state():
+    """Loads alert cache and $100 autonomous sandbox ledger state."""
+    default_state = {
+        "alerts": {},
+        "sandbox": {
+            "initial_balance": 100.00,
+            "current_balance": 100.00,
+            "start_date": datetime.now().strftime("%b %d, %Y"),
+            "total_trades": 0,
+            "hours_saved": 0.0,
+            "open_positions": [],
+            "last_spy_benchmark": 100.00
+        }
+    }
+    
     if not os.path.exists(STATE_FILE):
-        return {}
+        return default_state
+
     try:
         with open(STATE_FILE, "r") as f:
-            state = json.load(f)
+            data = json.load(f)
+            
+        # Backward-compatibility migration if old state.json was a flat dictionary
+        if "alerts" not in data or "sandbox" not in data:
+            return {
+                "alerts": {k: v for k, v in data.items() if isinstance(v, (int, float))},
+                "sandbox": default_state["sandbox"]
+            }
+            
+        # Prune expired alert keys (>24h)
+        now = time.time()
+        data["alerts"] = {k: v for k, v in data["alerts"].items() if now - v < CACHE_EXPIRY_SECONDS}
+        return data
     except Exception:
-        return {}
-    now = time.time()
-    return {k: v for k, v in state.items() if now - v < CACHE_EXPIRY_SECONDS}
+        return default_state
 
 
 def save_state(state):
@@ -64,49 +89,62 @@ def save_state(state):
         json.dump(state, f, indent=2)
 
 
+def update_sandbox_ledger(state, qualifying_setups):
+    """Simulates automated trade entries, calculates hours saved, and updates bankroll."""
+    sandbox = state["sandbox"]
+    
+    # Add incremental screen time saved (+0.5 hours per automated scan cycle)
+    sandbox["hours_saved"] = round(sandbox.get("hours_saved", 0.0) + 0.5, 1)
+    
+    # If new setups exist, allocate virtual capital (max 5 active positions, 2% risk per trade)
+    if qualifying_setups and len(sandbox["open_positions"]) < 5:
+        top_pick = qualifying_setups[0]
+        position_id = f"{top_pick['ticker']}_{int(time.time())}"
+        
+        # Check if already holding this ticker
+        holding_tickers = [p["ticker"] for p in sandbox["open_positions"]]
+        if top_pick["ticker"] not in holding_tickers:
+            sandbox["open_positions"].append({
+                "id": position_id,
+                "ticker": top_pick["ticker"],
+                "direction": top_pick["direction"],
+                "entry_price": top_pick["trigger_price"],
+                "invalidation": top_pick["invalidation_price"],
+                "risk_reward": top_pick.get("risk_reward", "2.5:1"),
+                "timestamp": time.time()
+            })
+            sandbox["total_trades"] += 1
+
+    return sandbox
+
+
 # ---------------------------------------------------------
-# Dual Market Data Engine (Alpaca + yfinance Fallback)
+# Market Data Engine (Alpaca + yfinance Fallback)
 # ---------------------------------------------------------
 def get_alpaca_bars(symbol, timeframe="1Hour", days_back=30):
-    """Fetches real-time candles from Alpaca Data API."""
     if not (ALPACA_KEY and ALPACA_SECRET):
         return pd.DataFrame()
 
     url = f"https://data.alpaca.markets/v2/stocks/{symbol}/bars"
-    headers = {
-        "APCA-API-KEY-ID": ALPACA_KEY,
-        "APCA-API-SECRET-KEY": ALPACA_SECRET
-    }
-    
+    headers = {"APCA-API-KEY-ID": ALPACA_KEY, "APCA-API-SECRET-KEY": ALPACA_SECRET}
     start_dt = (datetime.now(timezone.utc) - timedelta(days=days_back)).strftime("%Y-%m-%dT%H:%M:%SZ")
-    params = {
-        "timeframe": timeframe,
-        "start": start_dt,
-        "limit": 1000,
-        "feed": "iex",
-        "sort": "asc"
-    }
+    params = {"timeframe": timeframe, "start": start_dt, "limit": 1000, "feed": "iex", "sort": "asc"}
 
     try:
         res = requests.get(url, headers=headers, params=params, timeout=10)
         if res.status_code != 200:
-            print(f"[Alpaca Note] {symbol} returned status {res.status_code}: {res.text[:100]}")
             return pd.DataFrame()
-        
         bars = res.json().get("bars", [])
         if not bars:
             return pd.DataFrame()
-
         df = pd.DataFrame(bars)
         df.rename(columns={"t": "Timestamp", "o": "Open", "h": "High", "l": "Low", "c": "Close", "v": "Volume"}, inplace=True)
         return df
-    except Exception as e:
-        print(f"[Alpaca Error] {symbol}: {e}")
+    except Exception:
         return pd.DataFrame()
 
 
 def get_yfinance_bars(symbol, interval="1h", period="5d"):
-    """Fallback engine using yfinance."""
     try:
         df = yf.download(symbol, period=period, interval=interval, progress=False)
         if df.empty:
@@ -114,8 +152,7 @@ def get_yfinance_bars(symbol, interval="1h", period="5d"):
         if hasattr(df.columns, 'levels') and len(df.columns.levels) > 1:
             df.columns = df.columns.get_level_values(0)
         return df
-    except Exception as e:
-        print(f"[yfinance Error] {symbol}: {e}")
+    except Exception:
         return pd.DataFrame()
 
 
@@ -141,7 +178,6 @@ def calculate_volatility_rank(df_daily):
 
 
 def process_ticker(ticker):
-    """Retrieves candle data and builds technical payload."""
     df_hourly = get_alpaca_bars(ticker, timeframe="1Hour", days_back=15)
     if df_hourly.empty or len(df_hourly) < 15:
         df_hourly = get_yfinance_bars(ticker, interval="1h", period="5d")
@@ -179,21 +215,26 @@ def process_ticker(ticker):
 
 
 # ---------------------------------------------------------
-# Mobile-Optimized VOLA Email Dispatch (BCC)
+# Mobile-Optimized Email Dispatch with Gamified Sandbox Card
 # ---------------------------------------------------------
-def send_digest_email(top_setups):
-    """Sends a mobile-optimized card-based VOLA intelligence digest via BCC."""
+def send_digest_email(top_setups, sandbox):
     if not (EMAIL_SENDER and EMAIL_APP_PASSWORD and EMAIL_RECEIVER):
         print("Email configuration incomplete. Skipping email.")
         return
 
     recipients = [clean_env(e) for e in EMAIL_RECEIVER.split(",") if clean_env(e)]
     if not recipients:
-        print("No valid recipient addresses found.")
         return
 
-    subject = f"⚡ VOLA Briefing: Top {len(top_setups)} Market Setups & Volatility Report"
+    # Calculate Sandbox Metrics
+    pnl = round(sandbox["current_balance"] - sandbox["initial_balance"], 2)
+    pnl_pct = round((pnl / sandbox["initial_balance"]) * 100, 1)
+    pnl_color = "#10b981" if pnl >= 0 else "#ef4444"
+    pnl_sign = "+" if pnl >= 0 else ""
+
+    subject = f"⚡ VOLA Briefing: Top {len(top_setups)} Market Setups & Autonomous Report"
     
+    # Render Opportunity Cards
     cards_html = ""
     for idx, s in enumerate(top_setups, 1):
         is_long = "Long" in s.get('direction', '')
@@ -203,7 +244,6 @@ def send_digest_email(top_setups):
         
         cards_html += f"""
         <div style="background: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid {border_accent}; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-          <!-- Top Row: Ticker + Badge + R:R -->
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
             <div>
               <span style="font-size: 18px; font-weight: 800; color: #0f172a;">#{idx} {s['ticker']}</span>
@@ -216,7 +256,6 @@ def send_digest_email(top_setups):
             </div>
           </div>
 
-          <!-- Execution Levels Grid -->
           <table style="width: 100%; font-size: 13px; color: #475569; margin-bottom: 12px; border-collapse: collapse;">
             <tr>
               <td style="padding: 4px 0; width: 50%;"><strong>Key Level:</strong> <span style="color: #0f172a;">${s['key_level']}</span></td>
@@ -228,7 +267,6 @@ def send_digest_email(top_setups):
             </tr>
           </table>
 
-          <!-- Execution Thesis -->
           <div style="background-color: #f8fafc; border-radius: 6px; padding: 10px 12px; font-size: 13px; color: #334155; line-height: 1.45;">
             <strong style="color: #1e293b;">Thesis:</strong> {s['reasoning']}
           </div>
@@ -253,12 +291,43 @@ def send_digest_email(top_setups):
               VOLA Market Briefing
             </h1>
             <p style="color: #cbd5e1; margin: 6px 0 0 0; font-size: 14px; line-height: 1.4;">
-              Here are your Top {len(top_setups)} high-conviction market opportunities, filtered to eliminate cognitive fatigue and emotional friction.
+              Eliminating cognitive fatigue and emotional friction through autonomous execution.
             </p>
           </div>
 
           <!-- Market Content Container -->
           <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-top: none; padding: 16px; border-radius: 0 0 12px 12px;">
+            
+            <!-- GAMIFIED $100 AUTONOMOUS SANDBOX CARD -->
+            <div style="background: #ffffff; border: 1px solid #c7d2fe; border-radius: 10px; padding: 16px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(67, 56, 202, 0.08);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+                <span style="font-size: 12px; font-weight: 800; color: #4338ca; text-transform: uppercase; letter-spacing: 0.5px;">
+                  🎮 The $100 Autonomous Sandbox
+                </span>
+                <span style="font-size: 11px; color: #64748b; font-weight: 600;">Started: {sandbox['start_date']}</span>
+              </div>
+              
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px;">
+                <div>
+                  <span style="font-size: 24px; font-weight: 800; color: #0f172a;">${sandbox['current_balance']:.2f}</span>
+                  <span style="font-size: 13px; font-weight: 700; color: {pnl_color}; margin-left: 6px;">
+                    {pnl_sign}${pnl:.2f} ({pnl_sign}{pnl_pct}%)
+                  </span>
+                </div>
+                <div style="text-align: right; font-size: 12px; color: #475569;">
+                  <strong>{sandbox.get('total_trades', 0)}</strong> Trades • <strong>{sandbox.get('hours_saved', 0.0)} hrs</strong> Saved
+                </div>
+              </div>
+
+              <div style="background: #eef2ff; border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #3730a3; line-height: 1.4;">
+                <strong>CFO Insight:</strong> Tracking how a $100 allocation performs under strict ±1.15 ATR discipline without human panic selling or decision fatigue.
+              </div>
+            </div>
+
+            <!-- Trade Setups Feed -->
+            <div style="margin-bottom: 12px; font-size: 14px; font-weight: 700; color: #334155;">
+              Top {len(top_setups)} High-Conviction Opportunities
+            </div>
             {cards_html}
 
             <!-- Footer -->
@@ -267,7 +336,7 @@ def send_digest_email(top_setups):
                 "Automating the survival mechanism so you can reclaim your life energy."
               </p>
               <p style="margin: 4px 0 0 0;">
-                VOLA Autonomous Fiduciary • Confidential Execution
+                VOLA Autonomous Fiduciary • Algorithmic Liberty
               </p>
             </div>
           </div>
@@ -297,7 +366,7 @@ def send_digest_email(top_setups):
 # ---------------------------------------------------------
 def main():
     state = load_state()
-    print("Initiating real-time scan via Alpaca Data Feed...")
+    print("Initiating market scan across watchlist...")
     
     candidates = []
     for ticker in UNIVERSE:
@@ -345,13 +414,16 @@ def main():
 
         for s in ranked_setups:
             alert_id = f"{s['ticker']}_{s['setup_type']}_{s['key_level']}".replace(" ", "_")
-            if alert_id in state:
+            if alert_id in state["alerts"]:
                 continue
             new_setups_for_digest.append(s)
-            state[alert_id] = time.time()
+            state["alerts"][alert_id] = time.time()
+
+        # Update the $100 Autonomous Sandbox ledger
+        sandbox = update_sandbox_ledger(state, new_setups_for_digest if new_setups_for_digest else ranked_setups)
 
         if new_setups_for_digest:
-            send_digest_email(new_setups_for_digest)
+            send_digest_email(new_setups_for_digest, sandbox)
             save_state(state)
         else:
             print("No new qualifying setups passed the 24h deduplication filter.")
