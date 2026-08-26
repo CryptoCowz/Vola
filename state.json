@@ -109,14 +109,26 @@
     "MSFT_POC_Reclaim_490.77": 1787770024.789705,
     "META_POC_Reclaim_Continuation_570.76": 1787770024.789706,
     "PLTR_POC_Support_Hold_175.39": 1787770024.7897072,
-    "GOOGL_Balance_Low_Rejection_338.57": 1787770024.7897084
+    "GOOGL_Balance_Low_Rejection_338.57": 1787770024.7897084,
+    "AVGO_Balance_Edge_Reclaim_350.14": 1787770815.81334,
+    "DIS_Failed_Breakout_/_Rejection_111.81": 1787770815.8133428,
+    "GOOGL_Balance_Edge_Reclaim_338.57": 1787770815.813344,
+    "XOM_Balance_Edge_Reclaim_157.44": 1787770815.8133445,
+    "PLTR_Balance_Edge_Rejection_182.42": 1787770815.8133452,
+    "NVDA_Balance_Edge_Reclaim_207.4": 1787770815.8133483,
+    "AAPL_Failed_Breakout_320.28": 1787770815.813349,
+    "COST_Balance_Edge_Reclaim_925.9": 1787770815.8133516,
+    "META_Value_Area_Reclaim_537.4": 1787770815.8133523,
+    "IWM_Balance_Edge_Reclaim_297.04": 1787770815.813353,
+    "LLY_Balance_Edge_Reclaim_1164.61": 1787770815.8133535,
+    "GS_Balance_Edge_Reclaim_1001.78": 1787770815.813354
   },
   "sandbox": {
     "initial_balance": 100.0,
     "current_balance": 100.0,
     "start_date": "Aug 26, 2026",
     "total_trades": 1,
-    "hours_saved": 1.0,
+    "hours_saved": 1.5,
     "open_positions": [
       {
         "id": "AVGO_1787760557",
