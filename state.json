@@ -1,29 +1,5 @@
 {
   "alerts": {
-    "AVGO_Balance_Edge_Reclaim_355.32": 1787751900.235241,
-    "ARM_Balance_Edge_Reclaim_234.1": 1787751900.2352438,
-    "CVX_Balance_Edge_Reclaim_193.87": 1787751900.235247,
-    "SPY_Balance_Edge_Reclaim_762.07": 1787751900.2352498,
-    "COST_Failed_Breakout_/_Rejection_977.98": 1787751900.2352514,
-    "META_Balance_Edge_Reclaim_537.4": 1787751900.235254,
-    "AMD_Failed_Breakout_/_Rejection_517.23": 1787751900.2352548,
-    "TSLA_Failed_Breakout_/_Rejection_366.5": 1787751900.235256,
-    "MSFT_Failed_Breakout_/_Rejection_504.45": 1787751900.235257,
-    "AAPL_POC_Rebound_/_Long_Continuation_310.43": 1787751900.2352605,
-    "AVGO_Balance_Edge_Reclaim_350.75": 1787754858.529089,
-    "AMZN_High_IV_Balance_Reclaim_257.11": 1787754858.5290914,
-    "BA_High_IV_Balance_Reclaim_208.74": 1787754858.5290926,
-    "AMD_POC_Reclaim_484.33": 1787754858.5290973,
-    "MARA_Failed_Breakout_12.46": 1787754858.5290992,
-    "QQQ_Balance_Edge_Bounce_702.83": 1787754858.5291011,
-    "NFLX_Balance_Edge_Rejection_82.45": 1787754858.529102,
-    "SPY_Balance_Edge_Bounce_762.07": 1787754858.5291028,
-    "META_High_IV_Mean_Reversion_574.16": 1787754858.5291052,
-    "AAPL_High_IV_POC_Reclaim_310.43": 1787754858.5291061,
-    "CVX_High_IV_POC_Breakout_201.39": 1787754858.5291066,
-    "PLTR_High_IV_POC_Reclaim_175.39": 1787754858.5291078,
-    "GS_Balance_Edge_Rejection_1063.4": 1787754858.5291088,
-    "MSFT_High_IV_Mean_Reversion_490.78": 1787754858.5291097,
     "AVGO_Balance_Edge_Reclaim_350.63": 1787760557.8834267,
     "SPY_Balance_Edge_Spring_762.07": 1787760557.883432,
     "DIS_Failed_Breakout_Rejection_111.81": 1787760557.8834352,
@@ -78,14 +54,28 @@
     "DIS_Balance_Edge_Rejection_111.81": 1787779545.6583362,
     "META_POC_Mean_Reversion_570.76": 1787779545.6583378,
     "QQQ_Balance_Edge_Reclaim_702.83": 1787779545.6583383,
-    "CAT_Balance_Edge_Reclaim_801.26": 1787779545.658339
+    "CAT_Balance_Edge_Reclaim_801.26": 1787779545.658339,
+    "XOM_Balance_Edge_Reclaim_156.19": 1787841832.1345742,
+    "BA_High_Volatility_Mean_Reversion_208.74": 1787841832.1345756,
+    "AMZN_High_Volatility_Mean_Reversion_255.7": 1787841832.1345766,
+    "NKE_Balance_Edge_Reclaim_38.39": 1787841832.1345778,
+    "GOOGL_High_Volatility_Mean_Reversion_338.54": 1787841832.1345804,
+    "PLTR_High_Volatility_Rejection_185.25": 1787841832.1345818,
+    "NVDA_High_Volatility_Rejection_227.9": 1787841832.1345828,
+    "MSFT_Balance_Edge_Rejection_505.35": 1787841832.1345835,
+    "MARA_High_Volatility_Rejection_12.46": 1787841832.1345847,
+    "TSLA_POC_Reclaim_Continuation_345.12": 1787841832.1345856,
+    "AMD_Balance_Edge_Reclaim_451.42": 1787841832.1345863,
+    "AAPL_High_Volatility_Reclaim_310.43": 1787841832.134587,
+    "META_High_Volatility_Reclaim_569.59": 1787841832.1345882,
+    "GS_POC_Reclaim_Continuation_1032.59": 1787841832.1345892
   },
   "sandbox": {
     "initial_balance": 100.0,
     "current_balance": 100.0,
     "start_date": "Aug 26, 2026",
-    "total_trades": 2,
-    "hours_saved": 2.0,
+    "total_trades": 3,
+    "hours_saved": 2.5,
     "open_positions": [
       {
         "id": "AVGO_1787760557",
@@ -104,6 +94,15 @@
         "invalidation": 207.3,
         "risk_reward": "4.21:1",
         "timestamp": 1787779545.658352
+      },
+      {
+        "id": "XOM_1787841832",
+        "ticker": "XOM",
+        "direction": "LONG",
+        "entry_price": 157.51,
+        "invalidation": 154.87,
+        "risk_reward": "4.22:1",
+        "timestamp": 1787841832.1346009
       }
     ],
     "last_spy_benchmark": 100.0
