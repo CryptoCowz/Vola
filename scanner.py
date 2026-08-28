@@ -14,7 +14,7 @@ from google import genai
 from google.genai import types
 
 # ---------------------------------------------------------
-# Credentials & Environment Sanitization
+# Credentials & String Sanitization
 # ---------------------------------------------------------
 def clean_env(val):
     if not val:
@@ -45,10 +45,10 @@ client = genai.Client(api_key=GEMINI_API_KEY)
 
 
 # ---------------------------------------------------------
-# State & Gamified Sandbox Ledger Management
+# State Management & Sandbox Ledger
 # ---------------------------------------------------------
 def load_state():
-    """Loads alert cache and $100 autonomous sandbox ledger state."""
+    """Loads alert cache and persistent $100 simulated sandbox ledger."""
     default_state = {
         "alerts": {},
         "sandbox": {
@@ -57,8 +57,7 @@ def load_state():
             "start_date": datetime.now().strftime("%b %d, %Y"),
             "total_trades": 0,
             "hours_saved": 0.0,
-            "open_positions": [],
-            "last_spy_benchmark": 100.00
+            "open_positions": []
         }
     }
     
@@ -69,14 +68,12 @@ def load_state():
         with open(STATE_FILE, "r") as f:
             data = json.load(f)
             
-        # Backward-compatibility migration if old state.json was a flat dictionary
         if "alerts" not in data or "sandbox" not in data:
             return {
                 "alerts": {k: v for k, v in data.items() if isinstance(v, (int, float))},
                 "sandbox": default_state["sandbox"]
             }
             
-        # Prune expired alert keys (>24h)
         now = time.time()
         data["alerts"] = {k: v for k, v in data["alerts"].items() if now - v < CACHE_EXPIRY_SECONDS}
         return data
@@ -89,37 +86,8 @@ def save_state(state):
         json.dump(state, f, indent=2)
 
 
-def update_sandbox_ledger(state, qualifying_setups):
-    """Simulates automated trade entries, calculates hours saved, and updates bankroll."""
-    sandbox = state["sandbox"]
-    
-    # Add incremental screen time saved (+0.5 hours per automated scan cycle)
-    sandbox["hours_saved"] = round(sandbox.get("hours_saved", 0.0) + 0.5, 1)
-    
-    # If new setups exist, allocate virtual capital (max 5 active positions, 2% risk per trade)
-    if qualifying_setups and len(sandbox["open_positions"]) < 5:
-        top_pick = qualifying_setups[0]
-        position_id = f"{top_pick['ticker']}_{int(time.time())}"
-        
-        # Check if already holding this ticker
-        holding_tickers = [p["ticker"] for p in sandbox["open_positions"]]
-        if top_pick["ticker"] not in holding_tickers:
-            sandbox["open_positions"].append({
-                "id": position_id,
-                "ticker": top_pick["ticker"],
-                "direction": top_pick["direction"],
-                "entry_price": top_pick["trigger_price"],
-                "invalidation": top_pick["invalidation_price"],
-                "risk_reward": top_pick.get("risk_reward", "2.5:1"),
-                "timestamp": time.time()
-            })
-            sandbox["total_trades"] += 1
-
-    return sandbox
-
-
 # ---------------------------------------------------------
-# Market Data Engine (Alpaca + yfinance Fallback)
+# Market Data Engines (Alpaca with yfinance Fallback)
 # ---------------------------------------------------------
 def get_alpaca_bars(symbol, timeframe="1Hour", days_back=30):
     if not (ALPACA_KEY and ALPACA_SECRET):
@@ -215,7 +183,89 @@ def process_ticker(ticker):
 
 
 # ---------------------------------------------------------
-# Mobile-Optimized Email Dispatch with Gamified Sandbox Card
+# Autonomous Gamified Simulation Engine
+# ---------------------------------------------------------
+def update_sandbox_ledger(state, qualifying_setups):
+    """
+    Simulates live trade execution, tracks active positions against live prices,
+    and updates the compounded $100 bankroll in state.json.
+    """
+    sandbox = state["sandbox"]
+    
+    # Increment screen time saved (0.5 hrs per automated scan)
+    sandbox["hours_saved"] = round(sandbox.get("hours_saved", 0.0) + 0.5, 1)
+    
+    # 1. Evaluate & Settle Open Positions
+    active_positions = []
+    for pos in sandbox.get("open_positions", []):
+        ticker = pos["ticker"]
+        df_now = get_alpaca_bars(ticker, timeframe="1Hour", days_back=2)
+        if df_now.empty:
+            df_now = get_yfinance_bars(ticker, interval="1h", period="2d")
+            
+        if df_now.empty:
+            active_positions.append(pos)
+            continue
+
+        latest_price = float(df_now['Close'].dropna().iloc[-1])
+        entry = pos["entry_price"]
+        stop = pos["invalidation"]
+        target = pos["target_price"]
+        is_long = "Long" in pos["direction"]
+        
+        target_hit = (latest_price >= target) if is_long else (latest_price <= target)
+        stop_hit = (latest_price <= stop) if is_long else (latest_price >= stop)
+
+        if target_hit:
+            pnl_gain = round(pos["risk_amount"] * pos["rr_ratio"], 2)
+            sandbox["current_balance"] = round(sandbox["current_balance"] + pnl_gain, 2)
+            print(f"[Sandbox] Target reached for {ticker}! Closed with +${pnl_gain}")
+        elif stop_hit:
+            pnl_loss = pos["risk_amount"]
+            sandbox["current_balance"] = round(max(0.0, sandbox["current_balance"] - pnl_loss), 2)
+            print(f"[Sandbox] Invalidation hit for {ticker}. Closed with -${pnl_loss}")
+        else:
+            active_positions.append(pos)
+
+    sandbox["open_positions"] = active_positions
+
+    # 2. Enter Top Ranked Trade into Simulation (Max 3 concurrent positions)
+    if qualifying_setups and len(sandbox["open_positions"]) < 3:
+        top_pick = qualifying_setups[0]
+        holding_tickers = [p["ticker"] for p in sandbox["open_positions"]]
+        
+        if top_pick["ticker"] not in holding_tickers:
+            try:
+                entry_p = float(top_pick["trigger_price"])
+                stop_p = float(top_pick["invalidation_price"])
+                risk_pct = 0.02  # 2% risk rule
+                risk_usd = round(sandbox["current_balance"] * risk_pct, 2)
+                
+                stop_dist = abs(entry_p - stop_p)
+                target_p = entry_p + (stop_dist * 2.5) if "Long" in top_pick["direction"] else entry_p - (stop_dist * 2.5)
+
+                new_pos = {
+                    "id": f"{top_pick['ticker']}_{int(time.time())}",
+                    "ticker": top_pick["ticker"],
+                    "direction": top_pick["direction"],
+                    "entry_price": entry_p,
+                    "invalidation": stop_p,
+                    "target_price": round(target_p, 2),
+                    "risk_amount": risk_usd,
+                    "rr_ratio": 2.5,
+                    "timestamp": time.time()
+                }
+                sandbox["open_positions"].append(new_pos)
+                sandbox["total_trades"] += 1
+                print(f"[Sandbox] Entered trade: {top_pick['ticker']} ({top_pick['direction']})")
+            except Exception as e:
+                print(f"[Sandbox] Error opening position: {e}")
+
+    return sandbox
+
+
+# ---------------------------------------------------------
+# Mobile-Optimized VOLA Digest Dispatch (BCC)
 # ---------------------------------------------------------
 def send_digest_email(top_setups, sandbox):
     if not (EMAIL_SENDER and EMAIL_APP_PASSWORD and EMAIL_RECEIVER):
@@ -226,7 +276,6 @@ def send_digest_email(top_setups, sandbox):
     if not recipients:
         return
 
-    # Calculate Sandbox Metrics
     pnl = round(sandbox["current_balance"] - sandbox["initial_balance"], 2)
     pnl_pct = round((pnl / sandbox["initial_balance"]) * 100, 1)
     pnl_color = "#10b981" if pnl >= 0 else "#ef4444"
@@ -234,7 +283,6 @@ def send_digest_email(top_setups, sandbox):
 
     subject = f"⚡ VOLA Briefing: Top {len(top_setups)} Market Setups & Autonomous Report"
     
-    # Render Opportunity Cards
     cards_html = ""
     for idx, s in enumerate(top_setups, 1):
         is_long = "Long" in s.get('direction', '')
@@ -324,7 +372,7 @@ def send_digest_email(top_setups, sandbox):
               </div>
             </div>
 
-            <!-- Trade Setups Feed -->
+            <!-- Setups Leaderboard -->
             <div style="margin-bottom: 12px; font-size: 14px; font-weight: 700; color: #334155;">
               Top {len(top_setups)} High-Conviction Opportunities
             </div>
@@ -366,7 +414,7 @@ def send_digest_email(top_setups, sandbox):
 # ---------------------------------------------------------
 def main():
     state = load_state()
-    print("Initiating market scan across watchlist...")
+    print("Initiating real-time market scan across watchlist...")
     
     candidates = []
     for ticker in UNIVERSE:
@@ -419,7 +467,7 @@ def main():
             new_setups_for_digest.append(s)
             state["alerts"][alert_id] = time.time()
 
-        # Update the $100 Autonomous Sandbox ledger
+        # Update the live simulation ledger
         sandbox = update_sandbox_ledger(state, new_setups_for_digest if new_setups_for_digest else ranked_setups)
 
         if new_setups_for_digest:
