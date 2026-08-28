@@ -372,7 +372,7 @@ def send_digest_email(top_setups, sandbox):
               </div>
             </div>
 
-            <!-- Setups Leaderboard -->
+            <!-- Setups Feed -->
             <div style="margin-bottom: 12px; font-size: 14px; font-weight: 700; color: #334155;">
               Top {len(top_setups)} High-Conviction Opportunities
             </div>
@@ -381,10 +381,10 @@ def send_digest_email(top_setups, sandbox):
             <!-- Footer -->
             <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 12px; line-height: 1.5;">
               <p style="margin: 0; font-weight: 600; color: #64748b;">
-                "Automating the survival mechanism so you can reclaim your life energy."
+                "Automating the survival mechanism so you can reclaim your life energy."[cite: 1, 4, 11]
               </p>
               <p style="margin: 4px 0 0 0;">
-                VOLA Autonomous Fiduciary • Algorithmic Liberty
+                VOLA Autonomous Fiduciary • Algorithmic Liberty[cite: 1, 4, 11]
               </p>
             </div>
           </div>
@@ -458,23 +458,16 @@ def main():
         )
         
         ranked_setups = json.loads(response.text)
-        new_setups_for_digest = []
-
-        for s in ranked_setups:
-            alert_id = f"{s['ticker']}_{s['setup_type']}_{s['key_level']}".replace(" ", "_")
-            if alert_id in state["alerts"]:
-                continue
-            new_setups_for_digest.append(s)
-            state["alerts"][alert_id] = time.time()
 
         # Update the live simulation ledger
-        sandbox = update_sandbox_ledger(state, new_setups_for_digest if new_setups_for_digest else ranked_setups)
+        sandbox = update_sandbox_ledger(state, ranked_setups)
 
-        if new_setups_for_digest:
-            send_digest_email(new_setups_for_digest, sandbox)
+        # Always dispatch the hourly digest during market runs
+        if ranked_setups:
+            send_digest_email(ranked_setups, sandbox)
             save_state(state)
         else:
-            print("No new qualifying setups passed the 24h deduplication filter.")
+            print("No qualifying market setups found during this scan.")
             
     except Exception as e:
         print(f"Evaluation error: {e}")
