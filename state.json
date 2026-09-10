@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 96.0,
+    "current_balance": 94.08,
     "start_date": "Aug 26, 2026",
-    "total_trades": 4,
-    "hours_saved": 4.0,
+    "total_trades": 5,
+    "hours_saved": 4.5,
     "open_positions": [
       {
         "id": "BA_1787779545",
@@ -20,15 +20,15 @@
         "risk_amount": 2.0
       },
       {
-        "id": "NFLX_1789055888",
-        "ticker": "NFLX",
-        "direction": "LONG",
-        "entry_price": 75.54,
-        "invalidation": 74.6,
-        "target_price": 73.19,
-        "risk_amount": 1.92,
+        "id": "META_1789059621",
+        "ticker": "META",
+        "direction": "SHORT",
+        "entry_price": 659.0,
+        "invalidation": 666.0,
+        "target_price": 641.5,
+        "risk_amount": 1.88,
         "rr_ratio": 2.5,
-        "timestamp": 1789055888.9239843
+        "timestamp": 1789059621.322302
       }
     ],
     "last_spy_benchmark": 100.0
