@@ -188,7 +188,7 @@ def process_ticker(ticker):
 def update_sandbox_ledger(state, qualifying_setups):
     """
     Simulates live trade execution, tracks active positions against live prices,
-    and updates the compounded $100 bankroll in state.json.
+    and safely updates the compounded $100 bankroll in state.json.
     """
     sandbox = state["sandbox"]
     
@@ -198,7 +198,7 @@ def update_sandbox_ledger(state, qualifying_setups):
     # 1. Evaluate & Settle Open Positions
     active_positions = []
     for pos in sandbox.get("open_positions", []):
-        ticker = pos["ticker"]
+        ticker = pos.get("ticker", "")
         df_now = get_alpaca_bars(ticker, timeframe="1Hour", days_back=2)
         if df_now.empty:
             df_now = get_yfinance_bars(ticker, interval="1h", period="2d")
@@ -208,23 +208,38 @@ def update_sandbox_ledger(state, qualifying_setups):
             continue
 
         latest_price = float(df_now['Close'].dropna().iloc[-1])
-        entry = pos["entry_price"]
-        stop = pos["invalidation"]
-        target = pos["target_price"]
-        is_long = "Long" in pos["direction"]
+        entry = float(pos.get("entry_price", latest_price))
+        stop = float(pos.get("invalidation", latest_price))
+        is_long = "Long" in pos.get("direction", "")
+        
+        # Safely handle legacy positions saved before sandbox features were added
+        target = pos.get("target_price")
+        rr_ratio = float(pos.get("rr_ratio", 2.5))
+        risk_amount = float(pos.get("risk_amount", 2.0))
+        
+        # If target_price is missing, calculate it dynamically
+        if not target:
+            stop_dist = abs(entry - stop)
+            target = entry + (stop_dist * rr_ratio) if is_long else entry - (stop_dist * rr_ratio)
+
+        target = float(target)
         
         target_hit = (latest_price >= target) if is_long else (latest_price <= target)
         stop_hit = (latest_price <= stop) if is_long else (latest_price >= stop)
 
         if target_hit:
-            pnl_gain = round(pos["risk_amount"] * pos["rr_ratio"], 2)
+            pnl_gain = round(risk_amount * rr_ratio, 2)
             sandbox["current_balance"] = round(sandbox["current_balance"] + pnl_gain, 2)
             print(f"[Sandbox] Target reached for {ticker}! Closed with +${pnl_gain}")
         elif stop_hit:
-            pnl_loss = pos["risk_amount"]
+            pnl_loss = risk_amount
             sandbox["current_balance"] = round(max(0.0, sandbox["current_balance"] - pnl_loss), 2)
             print(f"[Sandbox] Invalidation hit for {ticker}. Closed with -${pnl_loss}")
         else:
+            # Re-save missing keys so the legacy position is permanently updated
+            pos["target_price"] = round(target, 2)
+            pos["rr_ratio"] = rr_ratio
+            pos["risk_amount"] = risk_amount
             active_positions.append(pos)
 
     sandbox["open_positions"] = active_positions
