@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 94.08,
+    "current_balance": 92.2,
     "start_date": "Aug 26, 2026",
-    "total_trades": 6,
-    "hours_saved": 5.0,
+    "total_trades": 7,
+    "hours_saved": 5.5,
     "open_positions": [
       {
         "id": "BA_1787779545",
@@ -31,15 +31,15 @@
         "timestamp": 1789059621.322302
       },
       {
-        "id": "LLY_1789069326",
-        "ticker": "LLY",
+        "id": "NVDA_1789079762",
+        "ticker": "NVDA",
         "direction": "LONG",
-        "entry_price": 1123.11,
-        "invalidation": 1110.0,
-        "target_price": 1090.34,
-        "risk_amount": 1.88,
+        "entry_price": 216.91,
+        "invalidation": 213.9,
+        "target_price": 209.39,
+        "risk_amount": 1.84,
         "rr_ratio": 2.5,
-        "timestamp": 1789069326.9295418
+        "timestamp": 1789079762.1837428
       }
     ],
     "last_spy_benchmark": 100.0
