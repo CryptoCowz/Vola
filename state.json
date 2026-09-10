@@ -4,8 +4,8 @@
     "initial_balance": 100.0,
     "current_balance": 94.08,
     "start_date": "Aug 26, 2026",
-    "total_trades": 5,
-    "hours_saved": 4.5,
+    "total_trades": 6,
+    "hours_saved": 5.0,
     "open_positions": [
       {
         "id": "BA_1787779545",
@@ -29,6 +29,17 @@
         "risk_amount": 1.88,
         "rr_ratio": 2.5,
         "timestamp": 1789059621.322302
+      },
+      {
+        "id": "LLY_1789069326",
+        "ticker": "LLY",
+        "direction": "LONG",
+        "entry_price": 1123.11,
+        "invalidation": 1110.0,
+        "target_price": 1090.34,
+        "risk_amount": 1.88,
+        "rr_ratio": 2.5,
+        "timestamp": 1789069326.9295418
       }
     ],
     "last_spy_benchmark": 100.0
