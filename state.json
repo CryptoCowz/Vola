@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 88.36,
+    "current_balance": 86.59,
     "start_date": "Aug 26, 2026",
-    "total_trades": 8,
-    "hours_saved": 6.0,
+    "total_trades": 9,
+    "hours_saved": 6.5,
     "open_positions": [
       {
         "id": "META_1789059621",
@@ -19,15 +19,15 @@
         "timestamp": 1789059621.322302
       },
       {
-        "id": "NVDA_1789146389",
+        "id": "NVDA_1789155787",
         "ticker": "NVDA",
         "direction": "LONG",
-        "entry_price": 219.14,
-        "invalidation": 216.5,
-        "target_price": 212.54,
-        "risk_amount": 1.77,
+        "entry_price": 216.71,
+        "invalidation": 213.8,
+        "target_price": 209.44,
+        "risk_amount": 1.73,
         "rr_ratio": 2.5,
-        "timestamp": 1789146389.116066
+        "timestamp": 1789155787.8963153
       }
     ],
     "last_spy_benchmark": 100.0
