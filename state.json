@@ -2,23 +2,11 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 92.2,
+    "current_balance": 88.36,
     "start_date": "Aug 26, 2026",
-    "total_trades": 7,
-    "hours_saved": 5.5,
+    "total_trades": 8,
+    "hours_saved": 6.0,
     "open_positions": [
-      {
-        "id": "BA_1787779545",
-        "ticker": "BA",
-        "direction": "LONG",
-        "entry_price": 210.0,
-        "invalidation": 207.3,
-        "risk_reward": "4.21:1",
-        "timestamp": 1787779545.658352,
-        "target_price": 203.25,
-        "rr_ratio": 2.5,
-        "risk_amount": 2.0
-      },
       {
         "id": "META_1789059621",
         "ticker": "META",
@@ -31,15 +19,15 @@
         "timestamp": 1789059621.322302
       },
       {
-        "id": "NVDA_1789079762",
+        "id": "NVDA_1789146389",
         "ticker": "NVDA",
         "direction": "LONG",
-        "entry_price": 216.91,
-        "invalidation": 213.9,
-        "target_price": 209.39,
-        "risk_amount": 1.84,
+        "entry_price": 219.14,
+        "invalidation": 216.5,
+        "target_price": 212.54,
+        "risk_amount": 1.77,
         "rr_ratio": 2.5,
-        "timestamp": 1789079762.1837428
+        "timestamp": 1789146389.116066
       }
     ],
     "last_spy_benchmark": 100.0
