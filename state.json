@@ -2,22 +2,11 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 84.86,
+    "current_balance": 82.98,
     "start_date": "Aug 26, 2026",
     "total_trades": 10,
-    "hours_saved": 7.0,
+    "hours_saved": 7.5,
     "open_positions": [
-      {
-        "id": "META_1789059621",
-        "ticker": "META",
-        "direction": "SHORT",
-        "entry_price": 659.0,
-        "invalidation": 666.0,
-        "target_price": 641.5,
-        "risk_amount": 1.88,
-        "rr_ratio": 2.5,
-        "timestamp": 1789059621.322302
-      },
       {
         "id": "NVDA_1789166186",
         "ticker": "NVDA",
