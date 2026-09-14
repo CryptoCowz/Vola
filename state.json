@@ -4,8 +4,8 @@
     "initial_balance": 100.0,
     "current_balance": 82.98,
     "start_date": "Aug 26, 2026",
-    "total_trades": 10,
-    "hours_saved": 7.5,
+    "total_trades": 11,
+    "hours_saved": 8.0,
     "open_positions": [
       {
         "id": "NVDA_1789166186",
@@ -17,6 +17,17 @@
         "risk_amount": 1.7,
         "rr_ratio": 2.5,
         "timestamp": 1789166186.7865562
+      },
+      {
+        "id": "TSLA_1789425085",
+        "ticker": "TSLA",
+        "direction": "LONG",
+        "entry_price": 351.45,
+        "invalidation": 345.0,
+        "target_price": 335.33,
+        "risk_amount": 1.66,
+        "rr_ratio": 2.5,
+        "timestamp": 1789425085.35907
       }
     ],
     "last_spy_benchmark": 100.0
