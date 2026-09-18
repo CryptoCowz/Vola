@@ -4,8 +4,8 @@
     "initial_balance": 100.0,
     "current_balance": 73.44,
     "start_date": "Aug 26, 2026",
-    "total_trades": 17,
-    "hours_saved": 11.5,
+    "total_trades": 18,
+    "hours_saved": 12.0,
     "open_positions": [
       {
         "id": "META_1789494068",
@@ -28,6 +28,17 @@
         "risk_amount": 1.47,
         "rr_ratio": 2.5,
         "timestamp": 1789751141.1859477
+      },
+      {
+        "id": "COIN_1789760187",
+        "ticker": "COIN",
+        "direction": "SHORT",
+        "entry_price": 191.92,
+        "invalidation": 197.5,
+        "target_price": 177.97,
+        "risk_amount": 1.47,
+        "rr_ratio": 2.5,
+        "timestamp": 1789760187.591452
       }
     ],
     "last_spy_benchmark": 100.0
