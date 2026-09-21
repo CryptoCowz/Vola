@@ -4,8 +4,8 @@
     "initial_balance": 100.0,
     "current_balance": 68.87,
     "start_date": "Aug 26, 2026",
-    "total_trades": 19,
-    "hours_saved": 13.0,
+    "total_trades": 20,
+    "hours_saved": 13.5,
     "open_positions": [
       {
         "id": "AMD_1790016139",
@@ -17,6 +17,17 @@
         "risk_amount": 1.38,
         "rr_ratio": 2.5,
         "timestamp": 1790016139.1585498
+      },
+      {
+        "id": "CVX_1790030126",
+        "ticker": "CVX",
+        "direction": "LONG",
+        "entry_price": 204.81,
+        "invalidation": 202.23,
+        "target_price": 198.36,
+        "risk_amount": 1.38,
+        "rr_ratio": 2.5,
+        "timestamp": 1790030126.5933993
       }
     ],
     "last_spy_benchmark": 100.0
