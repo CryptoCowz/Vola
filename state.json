@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 68.87,
+    "current_balance": 67.49,
     "start_date": "Aug 26, 2026",
-    "total_trades": 20,
-    "hours_saved": 13.5,
+    "total_trades": 21,
+    "hours_saved": 14.0,
     "open_positions": [
       {
         "id": "AMD_1790016139",
@@ -19,15 +19,15 @@
         "timestamp": 1790016139.1585498
       },
       {
-        "id": "CVX_1790030126",
-        "ticker": "CVX",
-        "direction": "LONG",
-        "entry_price": 204.81,
-        "invalidation": 202.23,
-        "target_price": 198.36,
-        "risk_amount": 1.38,
+        "id": "ARM_1790098755",
+        "ticker": "ARM",
+        "direction": "SHORT",
+        "entry_price": 326.31,
+        "invalidation": 340.21,
+        "target_price": 291.56,
+        "risk_amount": 1.35,
         "rr_ratio": 2.5,
-        "timestamp": 1790030126.5933993
+        "timestamp": 1790098755.6538057
       }
     ],
     "last_spy_benchmark": 100.0
