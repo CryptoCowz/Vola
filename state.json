@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 66.11,
+    "current_balance": 69.41,
     "start_date": "Aug 26, 2026",
     "total_trades": 22,
-    "hours_saved": 14.5,
+    "hours_saved": 15.0,
     "open_positions": [
       {
         "id": "ARM_1790098755",
@@ -17,17 +17,6 @@
         "risk_amount": 1.35,
         "rr_ratio": 2.5,
         "timestamp": 1790098755.6538057
-      },
-      {
-        "id": "AMD_1790111915",
-        "ticker": "AMD",
-        "direction": "SHORT",
-        "entry_price": 623.5,
-        "invalidation": 626.5,
-        "target_price": 616.0,
-        "risk_amount": 1.32,
-        "rr_ratio": 2.5,
-        "timestamp": 1790111915.5899377
       }
     ],
     "last_spy_benchmark": 100.0
