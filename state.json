@@ -4,8 +4,8 @@
     "initial_balance": 100.0,
     "current_balance": 69.41,
     "start_date": "Aug 26, 2026",
-    "total_trades": 22,
-    "hours_saved": 15.5,
+    "total_trades": 23,
+    "hours_saved": 16.0,
     "open_positions": [
       {
         "id": "ARM_1790098755",
@@ -17,6 +17,17 @@
         "risk_amount": 1.35,
         "rr_ratio": 2.5,
         "timestamp": 1790098755.6538057
+      },
+      {
+        "id": "PLTR_1790272362",
+        "ticker": "PLTR",
+        "direction": "Short",
+        "entry_price": 191.4,
+        "invalidation": 195.8,
+        "target_price": 180.4,
+        "risk_amount": 1.39,
+        "rr_ratio": 2.5,
+        "timestamp": 1790272362.7842393
       }
     ],
     "last_spy_benchmark": 100.0
