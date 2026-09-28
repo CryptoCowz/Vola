@@ -2,22 +2,11 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 69.41,
+    "current_balance": 72.79,
     "start_date": "Aug 26, 2026",
-    "total_trades": 24,
-    "hours_saved": 17.5,
+    "total_trades": 25,
+    "hours_saved": 18.0,
     "open_positions": [
-      {
-        "id": "ARM_1790098755",
-        "ticker": "ARM",
-        "direction": "SHORT",
-        "entry_price": 326.31,
-        "invalidation": 340.21,
-        "target_price": 291.56,
-        "risk_amount": 1.35,
-        "rr_ratio": 2.5,
-        "timestamp": 1790098755.6538057
-      },
       {
         "id": "PLTR_1790272362",
         "ticker": "PLTR",
@@ -39,6 +28,17 @@
         "risk_amount": 1.39,
         "rr_ratio": 2.5,
         "timestamp": 1790285488.2519412
+      },
+      {
+        "id": "BAC_1790626079",
+        "ticker": "BAC",
+        "direction": "LONG",
+        "entry_price": 55.7,
+        "invalidation": 55.1,
+        "target_price": 54.2,
+        "risk_amount": 1.46,
+        "rr_ratio": 2.5,
+        "timestamp": 1790626079.372844
       }
     ],
     "last_spy_benchmark": 100.0
