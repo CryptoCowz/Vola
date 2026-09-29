@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 69.9,
+    "current_balance": 68.5,
     "start_date": "Aug 26, 2026",
-    "total_trades": 27,
-    "hours_saved": 19.0,
+    "total_trades": 28,
+    "hours_saved": 19.5,
     "open_positions": [
       {
         "id": "PLTR_1790272362",
@@ -30,15 +30,15 @@
         "timestamp": 1790285488.2519412
       },
       {
-        "id": "META_1790707151",
-        "ticker": "META",
+        "id": "ARM_1790722686",
+        "ticker": "ARM",
         "direction": "LONG",
-        "entry_price": 732.26,
-        "invalidation": 715.0,
-        "target_price": 689.11,
-        "risk_amount": 1.4,
+        "entry_price": 293.99,
+        "invalidation": 286.0,
+        "target_price": 274.01,
+        "risk_amount": 1.37,
         "rr_ratio": 2.5,
-        "timestamp": 1790707151.3439415
+        "timestamp": 1790722686.9409406
       }
     ],
     "last_spy_benchmark": 100.0
