@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 72.79,
+    "current_balance": 71.33,
     "start_date": "Aug 26, 2026",
-    "total_trades": 25,
-    "hours_saved": 18.0,
+    "total_trades": 26,
+    "hours_saved": 18.5,
     "open_positions": [
       {
         "id": "PLTR_1790272362",
@@ -30,15 +30,15 @@
         "timestamp": 1790285488.2519412
       },
       {
-        "id": "BAC_1790626079",
-        "ticker": "BAC",
+        "id": "GS_1790641398",
+        "ticker": "GS",
         "direction": "LONG",
-        "entry_price": 55.7,
-        "invalidation": 55.1,
-        "target_price": 54.2,
-        "risk_amount": 1.46,
+        "entry_price": 922.09,
+        "invalidation": 907.35,
+        "target_price": 885.24,
+        "risk_amount": 1.43,
         "rr_ratio": 2.5,
-        "timestamp": 1790626079.372844
+        "timestamp": 1790641398.9195383
       }
     ],
     "last_spy_benchmark": 100.0
