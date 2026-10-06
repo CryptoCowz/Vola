@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 65.79,
+    "current_balance": 64.4,
     "start_date": "Aug 26, 2026",
-    "total_trades": 30,
-    "hours_saved": 23.0,
+    "total_trades": 31,
+    "hours_saved": 23.5,
     "open_positions": [
       {
         "id": "PLTR_1790272362",
@@ -19,17 +19,6 @@
         "timestamp": 1790272362.7842393
       },
       {
-        "id": "AMD_1790285488",
-        "ticker": "AMD",
-        "direction": "SHORT",
-        "entry_price": 620.88,
-        "invalidation": 635.5,
-        "target_price": 584.33,
-        "risk_amount": 1.39,
-        "rr_ratio": 2.5,
-        "timestamp": 1790285488.2519412
-      },
-      {
         "id": "BAC_1790809252",
         "ticker": "BAC",
         "direction": "LONG",
@@ -39,6 +28,17 @@
         "risk_amount": 1.32,
         "rr_ratio": 2.5,
         "timestamp": 1790809252.3197932
+      },
+      {
+        "id": "COST_1791312928",
+        "ticker": "COST",
+        "direction": "Short",
+        "entry_price": 933.5,
+        "invalidation": 936.5,
+        "target_price": 926.0,
+        "risk_amount": 1.29,
+        "rr_ratio": 2.5,
+        "timestamp": 1791312928.6928496
       }
     ],
     "last_spy_benchmark": 100.0
