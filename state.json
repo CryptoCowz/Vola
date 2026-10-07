@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 64.4,
+    "current_balance": 66.41,
     "start_date": "Aug 26, 2026",
-    "total_trades": 31,
-    "hours_saved": 24.0,
+    "total_trades": 32,
+    "hours_saved": 24.5,
     "open_positions": [
       {
         "id": "PLTR_1790272362",
@@ -19,26 +19,15 @@
         "timestamp": 1790272362.7842393
       },
       {
-        "id": "BAC_1790809252",
-        "ticker": "BAC",
+        "id": "META_1791400854",
+        "ticker": "META",
         "direction": "LONG",
-        "entry_price": 54.7,
-        "invalidation": 54.2,
-        "target_price": 53.45,
-        "risk_amount": 1.32,
+        "entry_price": 718.46,
+        "invalidation": 711.0,
+        "target_price": 699.81,
+        "risk_amount": 1.33,
         "rr_ratio": 2.5,
-        "timestamp": 1790809252.3197932
-      },
-      {
-        "id": "COST_1791312928",
-        "ticker": "COST",
-        "direction": "Short",
-        "entry_price": 933.5,
-        "invalidation": 936.5,
-        "target_price": 926.0,
-        "risk_amount": 1.29,
-        "rr_ratio": 2.5,
-        "timestamp": 1791312928.6928496
+        "timestamp": 1791400854.1400323
       }
     ],
     "last_spy_benchmark": 100.0
