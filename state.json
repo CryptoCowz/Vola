@@ -2,32 +2,21 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 65.08,
+    "current_balance": 66.94,
     "start_date": "Aug 26, 2026",
-    "total_trades": 33,
-    "hours_saved": 25.0,
+    "total_trades": 34,
+    "hours_saved": 25.5,
     "open_positions": [
       {
-        "id": "PLTR_1790272362",
-        "ticker": "PLTR",
-        "direction": "Short",
-        "entry_price": 191.4,
-        "invalidation": 195.8,
-        "target_price": 180.4,
-        "risk_amount": 1.39,
+        "id": "MARA_1791487062",
+        "ticker": "MARA",
+        "direction": "LONG",
+        "entry_price": 9.75,
+        "invalidation": 9.39,
+        "target_price": 8.85,
+        "risk_amount": 1.34,
         "rr_ratio": 2.5,
-        "timestamp": 1790272362.7842393
-      },
-      {
-        "id": "MSFT_1791418391",
-        "ticker": "MSFT",
-        "direction": "SHORT",
-        "entry_price": 532.63,
-        "invalidation": 536.8,
-        "target_price": 522.21,
-        "risk_amount": 1.3,
-        "rr_ratio": 2.5,
-        "timestamp": 1791418391.8497016
+        "timestamp": 1791487062.8342242
       }
     ],
     "last_spy_benchmark": 100.0
