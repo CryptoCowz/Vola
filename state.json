@@ -4,8 +4,8 @@
     "initial_balance": 100.0,
     "current_balance": 63.0,
     "start_date": "Aug 26, 2026",
-    "total_trades": 37,
-    "hours_saved": 27.5,
+    "total_trades": 38,
+    "hours_saved": 28.0,
     "open_positions": [
       {
         "id": "ARM_1791587780",
@@ -17,6 +17,17 @@
         "risk_amount": 1.26,
         "rr_ratio": 2.5,
         "timestamp": 1791587780.7249424
+      },
+      {
+        "id": "BA_1791921153",
+        "ticker": "BA",
+        "direction": "LONG",
+        "entry_price": 185.46,
+        "invalidation": 183.22,
+        "target_price": 179.86,
+        "risk_amount": 1.26,
+        "rr_ratio": 2.5,
+        "timestamp": 1791921153.957056
       }
     ],
     "last_spy_benchmark": 100.0
