@@ -2,21 +2,21 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 67.97,
+    "current_balance": 66.61,
     "start_date": "Aug 26, 2026",
-    "total_trades": 40,
-    "hours_saved": 29.0,
+    "total_trades": 41,
+    "hours_saved": 29.5,
     "open_positions": [
       {
-        "id": "ARM_1792000892",
+        "id": "ARM_1792014079",
         "ticker": "ARM",
         "direction": "LONG",
-        "entry_price": 238.77,
-        "invalidation": 235.0,
-        "target_price": 229.34,
-        "risk_amount": 1.36,
+        "entry_price": 243.03,
+        "invalidation": 232.17,
+        "target_price": 215.88,
+        "risk_amount": 1.33,
         "rr_ratio": 2.5,
-        "timestamp": 1792000892.8345652
+        "timestamp": 1792014079.0116515
       }
     ],
     "last_spy_benchmark": 100.0
