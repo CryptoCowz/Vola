@@ -2,32 +2,21 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 61.74,
+    "current_balance": 67.97,
     "start_date": "Aug 26, 2026",
-    "total_trades": 39,
-    "hours_saved": 28.5,
+    "total_trades": 40,
+    "hours_saved": 29.0,
     "open_positions": [
       {
-        "id": "ARM_1791587780",
+        "id": "ARM_1792000892",
         "ticker": "ARM",
         "direction": "LONG",
-        "entry_price": 266.5,
-        "invalidation": 261.18,
-        "target_price": 253.2,
-        "risk_amount": 1.26,
+        "entry_price": 238.77,
+        "invalidation": 235.0,
+        "target_price": 229.34,
+        "risk_amount": 1.36,
         "rr_ratio": 2.5,
-        "timestamp": 1791587780.7249424
-      },
-      {
-        "id": "MARA_1791935076",
-        "ticker": "MARA",
-        "direction": "LONG",
-        "entry_price": 9.15,
-        "invalidation": 8.85,
-        "target_price": 8.4,
-        "risk_amount": 1.23,
-        "rr_ratio": 2.5,
-        "timestamp": 1791935076.3032866
+        "timestamp": 1792000892.8345652
       }
     ],
     "last_spy_benchmark": 100.0
