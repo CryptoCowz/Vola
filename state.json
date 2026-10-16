@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 65.28,
+    "current_balance": 63.97,
     "start_date": "Aug 26, 2026",
-    "total_trades": 43,
-    "hours_saved": 30.5,
+    "total_trades": 44,
+    "hours_saved": 31.0,
     "open_positions": [
       {
         "id": "NKE_1792086439",
@@ -19,15 +19,15 @@
         "timestamp": 1792086439.8330793
       },
       {
-        "id": "MARA_1792099363",
-        "ticker": "MARA",
+        "id": "META_1792171460",
+        "ticker": "META",
         "direction": "LONG",
-        "entry_price": 7.89,
-        "invalidation": 7.45,
-        "target_price": 6.79,
-        "risk_amount": 1.31,
+        "entry_price": 717.13,
+        "invalidation": 704.3,
+        "target_price": 685.05,
+        "risk_amount": 1.28,
         "rr_ratio": 2.5,
-        "timestamp": 1792099363.7233756
+        "timestamp": 1792171460.6472907
       }
     ],
     "last_spy_benchmark": 100.0
