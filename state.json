@@ -2,22 +2,11 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 60.21,
+    "current_balance": 58.9,
     "start_date": "Aug 26, 2026",
     "total_trades": 47,
-    "hours_saved": 32.5,
+    "hours_saved": 33.0,
     "open_positions": [
-      {
-        "id": "NKE_1792086439",
-        "ticker": "NKE",
-        "direction": "SHORT",
-        "entry_price": 37.26,
-        "invalidation": 37.6,
-        "target_price": 36.41,
-        "risk_amount": 1.31,
-        "rr_ratio": 2.5,
-        "timestamp": 1792086439.8330793
-      },
       {
         "id": "ARM_1792453235",
         "ticker": "ARM",
