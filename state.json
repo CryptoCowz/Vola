@@ -4,8 +4,8 @@
     "initial_balance": 100.0,
     "current_balance": 57.7,
     "start_date": "Aug 26, 2026",
-    "total_trades": 48,
-    "hours_saved": 34.0,
+    "total_trades": 49,
+    "hours_saved": 34.5,
     "open_positions": [
       {
         "id": "TSLA_1792605732",
@@ -17,6 +17,17 @@
         "risk_amount": 1.15,
         "rr_ratio": 2.5,
         "timestamp": 1792605732.249656
+      },
+      {
+        "id": "META_1792618951",
+        "ticker": "META",
+        "direction": "LONG",
+        "entry_price": 736.81,
+        "invalidation": 720.0,
+        "target_price": 694.79,
+        "risk_amount": 1.15,
+        "rr_ratio": 2.5,
+        "timestamp": 1792618951.7131138
       }
     ],
     "last_spy_benchmark": 100.0
