@@ -2,21 +2,21 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 58.9,
+    "current_balance": 57.7,
     "start_date": "Aug 26, 2026",
-    "total_trades": 47,
-    "hours_saved": 33.5,
+    "total_trades": 48,
+    "hours_saved": 34.0,
     "open_positions": [
       {
-        "id": "ARM_1792453235",
-        "ticker": "ARM",
-        "direction": "LONG",
-        "entry_price": 228.5,
-        "invalidation": 225.0,
-        "target_price": 219.75,
-        "risk_amount": 1.2,
+        "id": "TSLA_1792605732",
+        "ticker": "TSLA",
+        "direction": "SHORT",
+        "entry_price": 384.91,
+        "invalidation": 390.5,
+        "target_price": 370.94,
+        "risk_amount": 1.15,
         "rr_ratio": 2.5,
-        "timestamp": 1792453235.8049228
+        "timestamp": 1792605732.249656
       }
     ],
     "last_spy_benchmark": 100.0
