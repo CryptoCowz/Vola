@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 58.18,
+    "current_balance": 57.02,
     "start_date": "Aug 26, 2026",
-    "total_trades": 52,
-    "hours_saved": 36.0,
+    "total_trades": 53,
+    "hours_saved": 36.5,
     "open_positions": [
       {
         "id": "TSLA_1792605732",
@@ -19,15 +19,15 @@
         "timestamp": 1792605732.249656
       },
       {
-        "id": "META_1792778003",
+        "id": "META_1792790649",
         "ticker": "META",
         "direction": "LONG",
-        "entry_price": 643.49,
-        "invalidation": 630.0,
-        "target_price": 609.76,
-        "risk_amount": 1.16,
+        "entry_price": 640.63,
+        "invalidation": 629.0,
+        "target_price": 611.56,
+        "risk_amount": 1.14,
         "rr_ratio": 2.5,
-        "timestamp": 1792778003.6996193
+        "timestamp": 1792790649.3560488
       }
     ],
     "last_spy_benchmark": 100.0
