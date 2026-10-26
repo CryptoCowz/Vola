@@ -2,32 +2,21 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 57.02,
+    "current_balance": 54.73,
     "start_date": "Aug 26, 2026",
-    "total_trades": 53,
-    "hours_saved": 36.5,
+    "total_trades": 54,
+    "hours_saved": 37.0,
     "open_positions": [
       {
-        "id": "TSLA_1792605732",
-        "ticker": "TSLA",
-        "direction": "SHORT",
-        "entry_price": 384.91,
-        "invalidation": 390.5,
-        "target_price": 370.94,
-        "risk_amount": 1.15,
-        "rr_ratio": 2.5,
-        "timestamp": 1792605732.249656
-      },
-      {
-        "id": "META_1792790649",
-        "ticker": "META",
+        "id": "GOOGL_1793042336",
+        "ticker": "GOOGL",
         "direction": "LONG",
-        "entry_price": 640.63,
-        "invalidation": 629.0,
-        "target_price": 611.56,
-        "risk_amount": 1.14,
+        "entry_price": 318.61,
+        "invalidation": 315.5,
+        "target_price": 310.83,
+        "risk_amount": 1.09,
         "rr_ratio": 2.5,
-        "timestamp": 1792790649.3560488
+        "timestamp": 1793042336.497799
       }
     ],
     "last_spy_benchmark": 100.0
