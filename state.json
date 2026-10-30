@@ -2,21 +2,21 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 47.52,
+    "current_balance": 46.57,
     "start_date": "Aug 26, 2026",
-    "total_trades": 61,
-    "hours_saved": 41.0,
+    "total_trades": 62,
+    "hours_saved": 41.5,
     "open_positions": [
       {
-        "id": "GOOGL_1793385492",
+        "id": "GOOGL_1793401131",
         "ticker": "GOOGL",
         "direction": "LONG",
-        "entry_price": 280.81,
-        "invalidation": 276.5,
-        "target_price": 270.03,
-        "risk_amount": 0.95,
+        "entry_price": 279.88,
+        "invalidation": 274.5,
+        "target_price": 266.43,
+        "risk_amount": 0.93,
         "rr_ratio": 2.5,
-        "timestamp": 1793385492.080227
+        "timestamp": 1793401131.5605822
       }
     ],
     "last_spy_benchmark": 100.0
