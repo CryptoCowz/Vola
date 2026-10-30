@@ -2,21 +2,21 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 48.49,
+    "current_balance": 47.52,
     "start_date": "Aug 26, 2026",
-    "total_trades": 60,
-    "hours_saved": 40.5,
+    "total_trades": 61,
+    "hours_saved": 41.0,
     "open_positions": [
       {
-        "id": "META_1793315891",
-        "ticker": "META",
+        "id": "GOOGL_1793385492",
+        "ticker": "GOOGL",
         "direction": "LONG",
-        "entry_price": 614.79,
-        "invalidation": 605.5,
-        "target_price": 591.57,
-        "risk_amount": 0.97,
+        "entry_price": 280.81,
+        "invalidation": 276.5,
+        "target_price": 270.03,
+        "risk_amount": 0.95,
         "rr_ratio": 2.5,
-        "timestamp": 1793315891.44138
+        "timestamp": 1793385492.080227
       }
     ],
     "last_spy_benchmark": 100.0
