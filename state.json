@@ -2,21 +2,21 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 43.84,
+    "current_balance": 42.96,
     "start_date": "Aug 26, 2026",
-    "total_trades": 65,
-    "hours_saved": 43.0,
+    "total_trades": 66,
+    "hours_saved": 43.5,
     "open_positions": [
       {
-        "id": "GOOGL_1793752624",
-        "ticker": "GOOGL",
+        "id": "CAT_1793824012",
+        "ticker": "CAT",
         "direction": "LONG",
-        "entry_price": 279.53,
-        "invalidation": 275.5,
-        "target_price": 269.46,
-        "risk_amount": 0.88,
+        "entry_price": 590.49,
+        "invalidation": 578.0,
+        "target_price": 559.26,
+        "risk_amount": 0.86,
         "rr_ratio": 2.5,
-        "timestamp": 1793752624.455522
+        "timestamp": 1793824012.6222055
       }
     ],
     "last_spy_benchmark": 100.0
