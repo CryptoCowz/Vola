@@ -2,21 +2,21 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 42.96,
+    "current_balance": 45.11,
     "start_date": "Aug 26, 2026",
-    "total_trades": 66,
-    "hours_saved": 43.5,
+    "total_trades": 67,
+    "hours_saved": 44.0,
     "open_positions": [
       {
-        "id": "CAT_1793824012",
+        "id": "CAT_1793911233",
         "ticker": "CAT",
         "direction": "LONG",
-        "entry_price": 590.49,
-        "invalidation": 578.0,
-        "target_price": 559.26,
-        "risk_amount": 0.86,
+        "entry_price": 556.0,
+        "invalidation": 548.0,
+        "target_price": 536.0,
+        "risk_amount": 0.9,
         "rr_ratio": 2.5,
-        "timestamp": 1793824012.6222055
+        "timestamp": 1793911233.6842215
       }
     ],
     "last_spy_benchmark": 100.0
