@@ -2,21 +2,21 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 43.33,
+    "current_balance": 42.46,
     "start_date": "Aug 26, 2026",
-    "total_trades": 69,
-    "hours_saved": 45.0,
+    "total_trades": 70,
+    "hours_saved": 45.5,
     "open_positions": [
       {
-        "id": "CAT_1794010027",
-        "ticker": "CAT",
+        "id": "CVX_1794265154",
+        "ticker": "CVX",
         "direction": "LONG",
-        "entry_price": 558.66,
-        "invalidation": 545.0,
-        "target_price": 524.51,
-        "risk_amount": 0.87,
+        "entry_price": 210.27,
+        "invalidation": 207.9,
+        "target_price": 204.34,
+        "risk_amount": 0.85,
         "rr_ratio": 2.5,
-        "timestamp": 1794010027.464409
+        "timestamp": 1794265154.508608
       }
     ],
     "last_spy_benchmark": 100.0
