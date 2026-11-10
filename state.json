@@ -2,21 +2,21 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 42.46,
+    "current_balance": 41.61,
     "start_date": "Aug 26, 2026",
-    "total_trades": 70,
-    "hours_saved": 45.5,
+    "total_trades": 71,
+    "hours_saved": 46.0,
     "open_positions": [
       {
-        "id": "CVX_1794265154",
-        "ticker": "CVX",
-        "direction": "LONG",
-        "entry_price": 210.27,
-        "invalidation": 207.9,
-        "target_price": 204.34,
-        "risk_amount": 0.85,
+        "id": "AMZN_1794342511",
+        "ticker": "AMZN",
+        "direction": "Bearish",
+        "entry_price": 272.88,
+        "invalidation": 276.5,
+        "target_price": 263.83,
+        "risk_amount": 0.83,
         "rr_ratio": 2.5,
-        "timestamp": 1794265154.508608
+        "timestamp": 1794342511.8376334
       }
     ],
     "last_spy_benchmark": 100.0
