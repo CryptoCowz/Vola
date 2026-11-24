@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 48.32,
+    "current_balance": 47.35,
     "start_date": "Aug 26, 2026",
-    "total_trades": 78,
-    "hours_saved": 51.0,
+    "total_trades": 79,
+    "hours_saved": 51.5,
     "open_positions": [
       {
         "id": "COST_1794601776",
@@ -19,15 +19,15 @@
         "timestamp": 1794601776.01607
       },
       {
-        "id": "NKE_1795481426",
-        "ticker": "NKE",
-        "direction": "LONG",
-        "entry_price": 33.27,
-        "invalidation": 32.65,
-        "target_price": 31.72,
-        "risk_amount": 0.97,
+        "id": "IWM_1795561265",
+        "ticker": "IWM",
+        "direction": "Long",
+        "entry_price": 267.89,
+        "invalidation": 265.5,
+        "target_price": 273.86,
+        "risk_amount": 0.95,
         "rr_ratio": 2.5,
-        "timestamp": 1795481426.5845926
+        "timestamp": 1795561265.2499204
       }
     ],
     "last_spy_benchmark": 100.0
