@@ -4,8 +4,8 @@
     "initial_balance": 100.0,
     "current_balance": 47.35,
     "start_date": "Aug 26, 2026",
-    "total_trades": 79,
-    "hours_saved": 51.5,
+    "total_trades": 80,
+    "hours_saved": 52.0,
     "open_positions": [
       {
         "id": "COST_1794601776",
@@ -28,6 +28,17 @@
         "risk_amount": 0.95,
         "rr_ratio": 2.5,
         "timestamp": 1795561265.2499204
+      },
+      {
+        "id": "UNH_1795645911",
+        "ticker": "UNH",
+        "direction": "SHORT",
+        "entry_price": 363.44,
+        "invalidation": 369.89,
+        "target_price": 347.32,
+        "risk_amount": 0.95,
+        "rr_ratio": 2.5,
+        "timestamp": 1795645911.7126513
       }
     ],
     "last_spy_benchmark": 100.0
