@@ -2,10 +2,10 @@
   "alerts": {},
   "sandbox": {
     "initial_balance": 100.0,
-    "current_balance": 49.73,
+    "current_balance": 52.21,
     "start_date": "Aug 26, 2026",
-    "total_trades": 81,
-    "hours_saved": 52.5,
+    "total_trades": 82,
+    "hours_saved": 53.0,
     "open_positions": [
       {
         "id": "COST_1794601776",
@@ -30,15 +30,15 @@
         "timestamp": 1795561265.2499204
       },
       {
-        "id": "UNH_1795731670",
-        "ticker": "UNH",
-        "direction": "Long",
-        "entry_price": 322.24,
-        "invalidation": 316.5,
-        "target_price": 336.59,
-        "risk_amount": 0.99,
+        "id": "AMZN_1795816713",
+        "ticker": "AMZN",
+        "direction": "LONG",
+        "entry_price": 254.5,
+        "invalidation": 251.24,
+        "target_price": 246.35,
+        "risk_amount": 1.04,
         "rr_ratio": 2.5,
-        "timestamp": 1795731670.244281
+        "timestamp": 1795816713.8546803
       }
     ],
     "last_spy_benchmark": 100.0
